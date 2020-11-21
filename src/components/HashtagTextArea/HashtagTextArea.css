@@ -1,0 +1,22 @@
+.__HashtagTextAreaComponent--placeholder__:empty:not(:focus)::before {
+  content: attr(placeholder);
+  font-size: var(--form-placeholder-size);
+  font-weight: 400;
+  color: var(--color-grey-dark-1);
+}
+
+.__HashtagTextAreaComponent__:not(.__HashtagTextAreaComponent-overflow-hidden__) {
+  height: auto;
+}
+.__HashtagTextAreaComponent__ {
+  word-break: break-word;
+  padding-top: 8px;
+}
+
+.__HashtagTextAreaComponent-overflow-hidden__ {
+  overflow: hidden;
+}
+
+.__HashtagTextAreaComponent__[contenteditable="false"] {
+  background: var(--color-grey-light-3);
+}
