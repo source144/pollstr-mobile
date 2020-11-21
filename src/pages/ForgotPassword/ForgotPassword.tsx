@@ -1,7 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
+import { RootStateOrAny, useDispatch, useSelector } from "react-redux";
+import { authResendVerification } from "../../store/actions/authActions";
+import axios from "axios";
 
 const emailRegex = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
 
@@ -29,13 +32,13 @@ const ForgotPassword: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [responseError, setResponseError] = useState<string>("");
   const [needsVerification, setNeedsVerification] = useState<string>();
-  //   const {
-  //     verification_sent,
-  //     error: auth_error,
-  //     global_loading: auth_loading,
-  //     loading: verification_loading,
-  //   } = useSelector((state) => state.auth);
-  //   const dispatch = useDispatch();
+  const {
+    verification_sent,
+    error: auth_error,
+    global_loading: auth_loading,
+    loading: verification_loading,
+  } = useSelector((state: RootStateOrAny) => state.auth);
+  const dispatch = useDispatch();
 
   const [errors, setErrors] = useState<any>({
     email: "",
@@ -51,13 +54,13 @@ const ForgotPassword: React.FC = () => {
     e.preventDefault();
 
     // Prevent multiple requests
-    // if (auth_loading || verification_loading) return;
+    if (auth_loading || verification_loading) return;
 
     // Shouldn't be called. (Do nothing)
     if (!needsVerification) return;
 
     // Resend Verification Email to User
-    // dispatch(authResendVerification(needsVerification));
+    dispatch(authResendVerification(needsVerification));
   };
 
   const handleEmail = (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -73,14 +76,15 @@ const ForgotPassword: React.FC = () => {
     if (valid) {
       setNeedsVerification(undefined);
       setLoading(true);
-      /*axios
+      axios
         .post("/auth/password/forgot", { email })
         .then((response) => {
           setLoading(false);
-          toast("Password reset link sent!", {
-            position: "top-center",
-            autoClose: 5000,
-          });
+          //   TODO : Ionic Toast
+          //   toast("Password reset link sent!", {
+          //     position: "top-center",
+          //     autoClose: 5000,
+          //   });
           setRedirect(true);
         })
         .catch((error) => {
@@ -104,33 +108,29 @@ const ForgotPassword: React.FC = () => {
             setNeedsVerification(JSON.parse(error.config.data).email);
 
           setResponseError(errorMsg);
-		});
-		*/
+        });
+
       // Dispatch login request
       // Handle Error
       // or Forward Home
     } else setErrors(_errors);
   };
 
-  //   useEffect(() => {
-  //     if (verification_sent !== undefined) {
-  //       if (verification_sent === true) setNeedsVerification(undefined);
-  //       setResponseError(auth_error);
-  //     }
-  //   }, [verification_sent, auth_error]);
+  useEffect(() => {
+    if (verification_sent !== undefined) {
+      if (verification_sent === true) setNeedsVerification(undefined);
+      setResponseError(auth_error);
+    }
+  }, [verification_sent, auth_error]);
 
-  //   useEffect(() => {
-  //     setWebTitle("Forgot Password");
-  //   }, []);
-
-  //   if (redirect) return <Redirect to="/login" />;
+  if (redirect) return <Redirect to="/login" />;
 
   return (
     <>
       <div
         style={{
           display: "flex",
-          height: "100%",
+          minHeight: "100%",
           alignItems: "center",
           justifyContent: "center",
         }}

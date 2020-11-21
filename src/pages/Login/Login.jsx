@@ -101,7 +101,7 @@ const Login = () => {
       <div
         style={{
           display: "flex",
-          height: "100%",
+          minHeight: "100%",
           alignItems: "center",
           justifyContent: "center",
         }}

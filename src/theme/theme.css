@@ -35,8 +35,12 @@
   --color-blue-dark-1: #495057;
   --color-grey-dark-2: #777;
   --color-input-border-1: #dee2e6;
+  --color-grey-light-4: #e0e0e0;
   --color-grey-dark-1: #999;
   --color-primary: #55c57a;
+  --color-primary-light: #7ed56f;
+  --color-primary-damp: #3bac60;
+  --color-primary-dark: #28b485;
   --color-danger--1-unfocused: rgb(217, 83, 79, 0.4);
   --color-danger--1: #d9534f;
   --color-primary-light: #7ed56f;

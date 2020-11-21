@@ -161,7 +161,7 @@ const ManagePoll = ({ poll }) => {
                   style={{
                     alignSelf: "flex-end",
                     fontStyle: "italic",
-                    fontSize: "1rem",
+                    fontSize: "10px",
                   }}
                 >
                   (leave empty to remove passcode)

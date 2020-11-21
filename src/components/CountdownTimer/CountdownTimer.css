@@ -12,24 +12,13 @@
 }
 
 .text {
-  color: #aaa;
+    font-size: 8px;
+	color: #aaa;
 }
 
 .time {
-  font-size: 30px;
+  font-size: 20px;
 }
 .too-late {
-  font-size: 15px;
-}
-
-@media screen and (max-width: 600px) {
-  .time {
-    font-size: 20px ;
-  }
-  .too-late {
     font-size: 10px;
-  }
-  .text {
-    font-size: 7px;
-  }
 }

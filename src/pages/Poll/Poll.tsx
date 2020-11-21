@@ -8,54 +8,37 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLink, faLock } from "@fortawesome/free-solid-svg-icons";
 import { IonPopover } from "@ionic/react";
 import SharePoll from "../../components/SharePoll/SharePoll";
+import { RootStateOrAny, useDispatch, useSelector } from "react-redux";
+import { flushPoll, getPoll, votePoll } from "../../store/actions/pollActions";
+import socket from "../../store/socket";
+import { useParams } from "react-router";
 
-const poll: any = {
-  timeToLive: 49743,
-  hideResults: true,
-  usersOnly: false,
-  public: true,
-  autoTags: ["Election", "Day"],
-  tags: ["Election", "Day"],
-  total_votes: 12,
-  title: "It’s #Election #Day today!",
-  description: "Who do you think is going to win?!",
-  options: [
-    {
-      votes: 11,
-      title: "Biden",
-      id: "5fa172d2c43c770017d7b3c0",
-      percent: Math.round((11 / 12) * 100),
-    },
-    {
-      votes: 1,
-      title: "Trump",
-      id: "5fa172d2c43c770017d7b3c1",
-      percent: Math.round((1 / 12) * 100),
-    },
-  ],
-  createDate: "2020-11-03T15:10:10.246Z",
-  passcode: false,
-  id: "5fa172d2c43c770017d7b3bf",
-};
-const _prevent_fetch_: boolean = false;
-const poll_loading: boolean = false;
-const selected: boolean = false;
-const error: string = "";
 
 const Poll: React.FC = () => {
+  const { id } = useParams<any>();
   const pollWrapper = useRef<HTMLDivElement>(null);
   const [popoverContent, setPopoverContent] = useState<string>("");
+  const [passcode, setPasscode] = useState<string>("");
+
+  const dispatch = useDispatch();
+  const { poll, error, selected, loading: poll_loading } = useSelector(
+    (state: RootStateOrAny) => state.poll
+  );
+  const { global_loading: auth_loading, fingerprint } = useSelector(
+    (state: RootStateOrAny) => state.auth
+  );
+
+  // Prevent API calls until authenticated/identified
+  //   const _prevent_fetch_ = auth_loading || !fingerprint;
+  const _prevent_fetch_ = auth_loading;
 
   const handleVote = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
     if (!poll) return;
 
     if (poll.passcode) {
-      //   setModalContent("PASSCODE");
-      //   dispatch(modalOpen(pollWrapper));
-      //   open(pollWrapper);
-      // } else dispatch(votePoll(id, selected));
-    }
+      setPopoverContent("PASSCODE");
+    } else dispatch(votePoll(id, selected));
   };
   const handleShare = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     e.preventDefault();
@@ -64,14 +47,74 @@ const Poll: React.FC = () => {
     setPopoverContent("QR");
   };
 
+  const handlePasscode = (e: any) => {
+    e.preventDefault();
+    if (!poll) return;
 
-  const _QRModal = <SharePoll poll={poll} />
+    dispatch(votePoll(id, selected, passcode));
+    setPopoverContent("");
+    setPasscode("");
+  };
+
+  // TODO : useEffect for error to display error toasts
+  // Fetch poll ONLY after
+  // identifying user/guest
+  useEffect(() => {
+    if (!_prevent_fetch_) {
+      dispatch(getPoll(id));
+      return () => {
+        socket.emit("leave", `${id}`);
+        dispatch(flushPoll());
+      };
+    }
+  }, [id, _prevent_fetch_, dispatch]);
+
+  const _passcodePopover = (
+    <div className="form-form-wrapper">
+      <h1 className="form-title">Enter Passcode</h1>
+      <form onSubmit={handlePasscode} noValidate className="form-form">
+        <div className="form-item">
+          <div className="form-item-wrapper">
+            <input
+              value={passcode ?? ""}
+              className="form-item__input"
+              type="password"
+              placeholder="e.g. ********"
+              name="passcode"
+              formNoValidate
+              onChange={(e: any) => setPasscode(e.target.value)}
+            />
+            <span className="form-item__input-icon">
+              <FontAwesomeIcon icon={faLock} />
+            </span>
+          </div>
+        </div>
+        <div className="form-item">
+          <input
+            disabled={!passcode || !passcode.trim()}
+            onClick={handlePasscode}
+            className="btn btn--tertiary form-item__submit"
+            type="button"
+            value="Vote"
+          />
+        </div>
+      </form>
+    </div>
+  );
+
+  const _QRPopover = <SharePoll poll={poll} />;
 
   let _popover_content;
   switch (popoverContent) {
-	  case "PASSCODE": _popover_content = undefined; break;
-	  case "QR": _popover_content = _QRModal; break;
-	  default: _popover_content = undefined; break;
+    case "PASSCODE":
+      _popover_content = _passcodePopover;
+      break;
+    case "QR":
+      _popover_content = _QRPopover;
+      break;
+    default:
+      _popover_content = undefined;
+      break;
   }
 
   return (
@@ -86,15 +129,16 @@ const Poll: React.FC = () => {
       <div
         style={{
           display: "flex",
-          height: "100%",
+          minHeight: "100%",
           alignItems: "center",
           justifyContent: "center",
         }}
       >
-        {!_prevent_fetch_ &&
+        {/* {!_prevent_fetch_ &&
         !poll_loading &&
         poll &&
-        Object.keys(poll).length > 2 ? (
+        Object.keys(poll).length > 2 ? ( */}
+        {poll && Object.keys(poll).length > 2 ? (
           <div className="form-form-wrapper poll-wrapper" ref={pollWrapper}>
             <div
               className="poll-detail-wrapper"
@@ -195,8 +239,6 @@ const Poll: React.FC = () => {
                 </button>
               </div>
             </div>
-
-            {/* <Modal {...modalProps}>{_popover_content}</Modal> */}
           </div>
         ) : // : error ? <h1>{error}</h1> : <div style={{ height: "100%", width: "100%" }}></div>
         !!error ? (

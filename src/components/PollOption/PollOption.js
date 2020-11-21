@@ -1,6 +1,6 @@
 import React from 'react';
-// import { useSelector, useDispatch } from 'react-redux';
-// import { selectOption } from '../store/actions/pollActions';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectOption } from '../../store/actions/pollActions';
 import './PollOption.css';
 
 const SELECT_PERCENTAGE_INCREASE = 3;
@@ -15,10 +15,10 @@ const expired = true;
 const selected = null;
 const total_votes = 12;
 // TODO : selectable/voteable - defaults to true
-const PollOption = ({ option, isTemplate = false, interactable = true }) => {
-	// const { voted, hideResults, expired, total_votes } = !isTemplate ? useSelector(state => state.poll.poll) : templatePollData;
-	// const { selected } = !isTemplate ? useSelector(state => state.poll) : { selected: false };
-	// const dispatch = useDispatch();
+const PollOption = ({ option, interactable = true }) => {
+	const { voted, hideResults, expired, total_votes } = useSelector(state => state.poll.poll);
+	const { selected } = useSelector(state => state.poll);
+	const dispatch = useDispatch();
 
 	const disabled = voted != undefined || expired || !interactable;
 	const showResult = !hideResults || expired || !interactable;
@@ -45,9 +45,9 @@ const PollOption = ({ option, isTemplate = false, interactable = true }) => {
 
 	return (
 		<div className={`form--mb1 poll-option ${optionStyle}`}
-		// onClick={() => !disabled && !selected_this ?
-		// 	dispatch(selectOption(option.id))
-		// 	: undefined}
+			onClick={() => !disabled && !selected_this ?
+				dispatch(selectOption(option.id))
+				: undefined}
 		>
 			<label >{option.title}</label>
 			{option.description ? <span>{option.description}</span> : null}

@@ -51,7 +51,7 @@ import PageToolbar from "./components/PageToolbar/Pagetoolbar";
 setupConfig({ mode: "ios" });
 
 // ~~ Axios:
-axios.defaults.baseURL = 'https://pollstr-app.herokuapp.com/api/';
+axios.defaults.baseURL = "https://pollstr-app.herokuapp.com/api/";
 // axios.defaults.baseURL = 'https://pollstr.app/api/';  // <- alias
 // axios.defaults.baseURL = "http://localhost:5000/api/";
 
@@ -80,11 +80,11 @@ const App: React.FC = () => (
                 <Route path="/poll/open" exact>
                   <OpenPoll />
                 </Route>
-                <Route path="/poll/:id">
-                  <Poll />
-                </Route>
                 <Route path="/polls" exact>
                   <Manage />
+                </Route>
+                <Route path="/poll/:id">
+                  <Poll />
                 </Route>
                 {/* <Redirect to="/polls/" /> */}
               </Switch>

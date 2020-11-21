@@ -19,12 +19,12 @@ import {
   IonTitle,
   IonToolbar,
 } from "@ionic/react";
-import { useDispatch, useSelector } from "react-redux";
+import { RootStateOrAny, useDispatch, useSelector } from "react-redux";
 import _ from "lodash";
 import { authLogout } from "../../store/actions/authActions";
 
 const Navbar: React.FC = () => {
-  const { auth, global_loading } = useSelector((state) => state.auth);
+  const { auth, global_loading } = useSelector((state: RootStateOrAny) => state.auth);
   const dispatch = useDispatch();
   const hasAuth = !_.isEmpty(auth);
   console.log("auth", auth);

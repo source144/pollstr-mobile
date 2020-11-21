@@ -1,7 +1,15 @@
 import React, { useState, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, Redirect } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUserGraduate, faUserTie, faEnvelope, faLock, faKey } from "@fortawesome/free-solid-svg-icons";
+import {
+  faUserGraduate,
+  faUserTie,
+  faEnvelope,
+  faLock,
+  faKey,
+} from "@fortawesome/free-solid-svg-icons";
+import { RootStateOrAny, useDispatch, useSelector } from "react-redux";
+import { authSignup } from "../../store/actions/authActions";
 
 const emailRegex = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
 const lowerRegex = /(?=.*[a-z])/;
@@ -57,24 +65,23 @@ const checkForm: any = (payload: any) => {
 };
 
 const Signup: React.FC = () => {
-  //   const { signup_complete, signup_loading, signup_error } = useSelector(
-  //     (state) => state.auth
-  //   );
-  //   const dispatch = useDispatch();
+  const { signup_complete, signup_loading, signup_error } = useSelector(
+    (state: RootStateOrAny) => state.auth
+  );
+  const dispatch = useDispatch();
 
-  const signup_error: string = "";
-  const [firstName, setFirstName] = useState<string>('');
-  const [lastName, setLasttName] = useState<string>('');
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [confirm, setConfirm] = useState<string>('');
+  const [firstName, setFirstName] = useState<string>("");
+  const [lastName, setLasttName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [confirm, setConfirm] = useState<string>("");
 
   const [errors, setErrors] = useState<any>({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirm: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirm: "",
   });
 
   // TODO: novalidate
@@ -104,20 +111,20 @@ const Signup: React.FC = () => {
     const _errors = checkForm({ ..._auth, confirm: confirm });
     Object.keys(_errors!).forEach((key) => (valid = valid && !_errors[key]));
 
-    // if (valid) dispatch(authSignup(_auth));
+    if (valid) dispatch(authSignup(_auth));
 
     setErrors(_errors);
   };
 
   // TODO : change route to home
-  //   if (signup_complete) return <Redirect to="/" />;
+  if (signup_complete) return <Redirect to="/" />;
 
   return (
     <>
       <div
         style={{
           display: "flex",
-          height: "100%",
+          minHeight: "100%",
           alignItems: "center",
           justifyContent: "center",
         }}

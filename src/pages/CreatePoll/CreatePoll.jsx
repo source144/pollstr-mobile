@@ -29,23 +29,90 @@ import _ from "lodash";
 
 import "./CreatePoll.css";
 import CreatePollOption from "../../components/CreatePollOption/CreatePollOption";
+import { useSelector } from "react-redux";
 
 const responseError = "";
 const errors = {};
 const tempDate = Date.now();
 const currentYear = new Date().getFullYear();
-const isLoggedIn = false;
 const title = "";
 
+const pwRegex = /^\S+$/;
+const validate = (payload) => {
+  const errors = {
+    title: "",
+    description: "",
+    passcode: "",
+    optionErrors: false,
+    hasErrors: false,
+    options: "",
+  };
+
+  const _options = _.uniqBy(payload.options, "title");
+
+  // Title:
+  if (!payload.title || !(payload.title = payload.title.trim()))
+    errors.title = "Title is required";
+  else if (payload.title.trim().length > 50)
+    errors.title = "Title too long. (50 chars max)";
+
+  // if (payload.description && payload.description.trim().length > 50) errors.description = "Description too long. (50 chars max)";
+
+  if (_options.length < 2)
+    errors.options = "Must have two or more unique options";
+  // errors.options = _.map(payload.options, (option, idx) => {
+  // 	if (option.title && option.title.trim().length > 50) {
+  // 		errors.optionErrors = true;
+  // 		return "Option is too long. (50 chars max)";
+  // 	} else return '';
+  // });
+
+  if (payload.passcode) {
+    if (payload.passcode.length > 24)
+      errors.passcode = "Passcode too long. (24 chars max)";
+    else if (!pwRegex.test(payload.passcode))
+      errors.passcode = "Passcode must not contain whitespaces";
+  }
+
+  errors.hasErrors =
+    errors.title ||
+    errors.description ||
+    errors.passcode ||
+    errors.optionErrors;
+
+  return errors;
+};
+
 const CreatePoll = () => {
+  const { auth, global_loading: auth_loading } = useSelector(
+    (state) => state.auth
+  );
+  const isLoggedIn = !_.isEmpty(auth);
+
+  const [responseError, setResponseError] = useState("");
+  const [createdId, setCreatedId] = useState(undefined);
+  const [title, setTitle] = useState("");
+  const [passcode, setPasscode] = useState("");
+  const [description, setDescription] = useState("");
+  const [tags, setTags] = useState("");
   const [resultsHidden, setResultsHidden] = useState(true);
   const [publicPoll, setPublicPoll] = useState(false);
   const [allowGuests, setAllowGuests] = useState(true);
+  const [expireDate, setExpireDate] = useState("");
   const [options, setOptions] = useState([
-    { id: uuid(), value: "1" },
-    { id: uuid(), value: "2" },
-    { id: uuid(), value: "3" },
+    { id: uuid(), value: "" },
+    { id: uuid(), value: "" },
+    { id: uuid(), value: "" },
   ]);
+
+  const [errors, setErrors] = useState({
+    title: "",
+    description: "",
+    passcode: "",
+    optionErrors: false,
+    hasErrors: false,
+    options: "",
+  });
 
   function doReorder(e) {
     // The `from` and `to` properties contain the index of the item
@@ -131,26 +198,66 @@ const CreatePoll = () => {
   };
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Must finish logging
+    if (auth_loading) return;
+
+    const _payloadOptions = _.map(
+      _.filter(options, (option) => option.value && !!option.value.trim()),
+      (option) => ({ title: option.value.trim() })
+    );
+    const _timeToLive = !!expireDate
+      ? moment(expireDate).unix() - moment().unix()
+      : 0;
+    const payload = {
+      title: title || undefined,
+      description: description || undefined,
+      timeToLive: _timeToLive >= 0 ? _timeToLive : 0,
+      options: _payloadOptions,
+      passcode: passcode || undefined,
+      tags: tags,
+      usersOnly: !allowGuests,
+      public: publicPoll,
+      hideResults: resultsHidden,
+    };
+
+    const _errors = { ...errors, ...validate(payload) };
+    if (_errors.hasErrors) {
+      setErrors(_errors);
+      setResponseError("Make sure all fields are entered correctly!");
+      return;
+    }
+
+    // TODO : loading
+    axios
+      .post("/poll/", payload)
+      .then((response) => {
+        console.log("Created ", response.data.id);
+        setCreatedId(response.data.id);
+      })
+      .catch((error) => {
+        const errorMsg =
+          error.response && error.response.data
+            ? error.response.data.message
+              ? error.response.data.message
+              : typeof error.response.data.error === "string"
+              ? error.response.data.error
+              : error.message
+            : error.message;
+        setResponseError(errorMsg);
+      });
   };
-  const handleTitle = (e) => {
-    console.log(e);
-    // e.preventDefault();
+  const handleTitle = (value) => {
+    setTitle(value);
   };
-  const handleDescription = (e) => {
-    // e.preventDefault();
-    console.log(e);
+  const handleDescription = (value) => {
+    setDescription(value);
   };
   const handlePasscode = (e) => {
-    // e.preventDefault();
-    console.log(e);
+    setPasscode(e.target.value);
   };
   const handleTags = (e) => {
-    // e.preventDefault();
-    console.log(e);
-  };
-  const setExpireDate = (e) => {
-    // e.preventDefault();
-    console.log(e);
+    setTags(e.target.value);
   };
 
   return (
@@ -245,8 +352,8 @@ const CreatePoll = () => {
             //     },
             //     ...IonDatetime.defaultProps.pickerOptions.buttons,
             //   ],
-			// }}
-			// onBlur={} TODO : clear value if invalid
+            // }}
+            // onBlur={} TODO : clear value if invalid
             placeholder="No Expiry Set"
             className={`form-item__input ${
               !!errors.passcode ? "form-item__input--err" : ""
