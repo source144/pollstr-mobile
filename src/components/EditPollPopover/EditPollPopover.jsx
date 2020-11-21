@@ -27,6 +27,8 @@ const EditPollPopover = ({
   //   const isLoggedIn = !_.isEmpty(auth);
   const isLoggedIn = false;
 
+  console.log("POLL", poll);
+
   const [submitted, setSubmitted] = useState(false);
   const [tags, setTags] = useState(
     poll.specifiedTags
@@ -40,12 +42,17 @@ const EditPollPopover = ({
   const [publicPoll, setPublicPoll] = useState(poll.public);
   const [expireDate, setExpireDate] = useState(
     poll.timeToLive > 0
-      ? moment.unix(moment(poll.createDate).unix() + poll.timeToLive).toDate()
-      : undefined
+      ? moment
+          .unix(moment(poll.createDate).unix() + poll.timeToLive)
+          .toDate()
+          .toUTCString()
+      : ""
   );
 
+  console.log(poll.specifiedTags);
+
   const unchanged_tags =
-    tags == poll.specifiedTags
+    tags == poll.specifiedTags && !!poll.specifiedTags
       ? typeof poll.specifiedTags === "string"
         ? poll.specifiedTags
         : poll.specifiedTags.join(" ")
@@ -66,11 +73,14 @@ const EditPollPopover = ({
     unchanged_expireDate;
 
   const errors = { tags: "" };
+  console.log("expireDate", expireDate);
 
   const handleSubmit = (e) => {
     if (e && typeof e.preventDefault === "function") e.preventDefault();
     if (onSubmit && typeof onSubmit === "function") {
       setSubmitted(true);
+      console.log("expireDate", expireDate);
+      console.log("poll.createDate", poll.createDate);
       const _timeToLive = !!expireDate
         ? moment(expireDate).unix() - moment(poll.createDate).unix()
         : 0;
@@ -115,13 +125,7 @@ const EditPollPopover = ({
               displayFormat="D MMM YYYY hh:mm a"
               min={currentYear}
               max={currentYear + 5}
-              value={
-                poll.timeToLive > 0
-                  ? moment
-                      .unix(moment(poll.createDate).unix() + poll.timeToLive)
-                      .toDate()
-                  : ""
-              }
+              value={expireDate}
               onIonChange={(e) => {
                 setExpireDate(e.detail.value);
               }}

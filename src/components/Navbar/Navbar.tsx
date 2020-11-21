@@ -73,15 +73,15 @@ const Navbar: React.FC = () => {
           ) : (
             <>
               <IonMenuToggle>
-                <IonItem detail={false} button routerLink="/signup">
-                  <IonIcon slot="start" icon={personAddOutline} />
-                  <IonLabel>Sign Up</IonLabel>
-                </IonItem>
-              </IonMenuToggle>
-              <IonMenuToggle>
                 <IonItem detail={false} button routerLink="/login">
                   <IonIcon slot="start" icon={logInOutline} />
                   <IonLabel>Sign In</IonLabel>
+                </IonItem>
+              </IonMenuToggle>
+              <IonMenuToggle>
+                <IonItem detail={false} button routerLink="/signup">
+                  <IonIcon slot="start" icon={personAddOutline} />
+                  <IonLabel>Sign Up</IonLabel>
                 </IonItem>
               </IonMenuToggle>
             </>

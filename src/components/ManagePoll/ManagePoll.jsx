@@ -38,6 +38,8 @@ import PollOption from "../PollOption/PollOption";
 import SharePoll from "../SharePoll/SharePoll";
 import { IonPopover } from "@ionic/react";
 import EditPollPopover from "../EditPollPopover/EditPollPopover";
+import { useDispatch, useSelector } from "react-redux";
+import { deletePoll, editPoll, editPollPasscode } from "../../store/actions/managePollsActions";
 
 const error = undefined;
 const selected = undefined;
@@ -52,11 +54,11 @@ const ManagePoll = ({ poll }) => {
   const [popoverContent, setPopoverContent] = useState("");
   const pollWrapper = useRef();
 
-  //   const dispatch = useDispatch();
+  const dispatch = useDispatch();
   //   const { isOpen: modal_open } = useSelector((state) => state.modal);
-  //   const { op_loading: form_loading, op_error: form_error } = useSelector(
-  // (state) => state.polls
-  //   );
+  const { op_loading: form_loading, op_error: form_error } = useSelector(
+    (state) => state.polls
+  );
   //   const { modalProps, open, close } = useModal({
   //     id: `poll-${poll.id}-modal`,
   //     onClose: () => {
@@ -82,18 +84,18 @@ const ManagePoll = ({ poll }) => {
   const handleDeletePoll = (e) => {
     e.preventDefault();
 
-    // dispatch(deletePoll(poll.id));
-    // setSubmited(true);
+    dispatch(deletePoll(poll.id));
+    setSubmited(true);
   };
   const handleSavePasscode = (e) => {
     e.preventDefault();
 
-    // dispatch(editPollPasscode(poll.id, passcode));
-    // setSubmited(true);
+    dispatch(editPollPasscode(poll.id, passcode));
+    setSubmited(true);
   };
   const handleSavePoll = (pollData) => {
-    // dispatch(editPoll(poll.id, pollData));
-    // setSubmited(true);
+    dispatch(editPoll(poll.id, pollData));
+    setSubmited(true);
   };
 
   const _deleteModal = (
@@ -213,6 +215,12 @@ const ManagePoll = ({ poll }) => {
       break;
   }
 
+  useEffect(() => {
+    if (submited && !form_loading && !form_error) {
+      setPopoverContent("");
+    }
+  }, [submited, form_loading, form_error, dispatch]);
+
   return (
     <>
       {/* TODO : Minimize & and & Expand Buttons on top right */}
@@ -244,6 +252,7 @@ const ManagePoll = ({ poll }) => {
           >
             {!poll.timeToLive ? undefined : (
               <CountdownTimer
+                key={`poll-${poll.id}-${poll.timeToLive}`}
                 onComplete={() => {
                   // dispatch(disableVoting());
                 }}

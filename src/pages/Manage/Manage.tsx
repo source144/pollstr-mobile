@@ -202,7 +202,7 @@ const Manage: React.FC = () => {
   const _prevent_fetch_ = auth_loading || !hasAuth;
 
   useEffect(() => {
-    if (!_prevent_fetch_) {
+    if (!_prevent_fetch_ || true) {
       dispatch(getPolls());
       return () => {
         dispatch(flushPolls());

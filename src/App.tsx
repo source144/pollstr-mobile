@@ -86,7 +86,7 @@ const App: React.FC = () => (
                 <Route path="/poll/:id">
                   <Poll />
                 </Route>
-                {/* <Redirect to="/polls/" /> */}
+                <Redirect to="/polls/" />
               </Switch>
             </PageToolbar>
           </IonRouterOutlet>
