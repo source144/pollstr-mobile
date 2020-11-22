@@ -1,6 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import socket from '../socket';
+import _ from 'lodash'
 // import { toast } from 'react-toastify';
 // TODO : Ionic Toasts
 import {
@@ -47,7 +48,14 @@ export const getPoll = pollId => {
 				// Listen to this poll's updates
 				socket.emit('join', `${pollId}`);
 				socket.on(`update_${pollId}`, updatedPoll => {
-					dispatch(updatePoll(updatedPoll));
+					// Fallback if SocketIO payload doesn't arrive!
+					if (!updatedPoll) {
+						console.log("Fetching Updated Poll Using Axios.js")
+						axios.get(`poll/${pollId}`).then(response => {
+							console.log("Fetching Updated Poll via Axios.js success")
+							dispatch(updatePoll(_.pick(response.data, "total_votes", "options")));
+						}).catch(error => { });
+					} else dispatch(updatePoll(updatedPoll));
 				});
 			})
 			.catch(error => {

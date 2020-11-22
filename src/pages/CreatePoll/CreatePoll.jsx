@@ -296,7 +296,6 @@ const CreatePoll = () => {
 
   return (
     <div className="form-form-wrapper poll-create-form">
-			{createdId ?
       {createdId ? (
         // ------------------ //
         //   Create Success   //
@@ -318,7 +317,7 @@ const CreatePoll = () => {
             </div>
             <div className="poll-created-qr">
               <QRCode
-                value={`${window.location.protocol}//${window.location.host}/poll/${createdId}`}
+                value={`https://pollstr.app/poll/${createdId}`}
                 size={200}
               />
             </div>
@@ -326,7 +325,7 @@ const CreatePoll = () => {
             <div className="form-item form-item--clipboard">
               <div className="form-item-wrapper">
                 <input
-                  value={`${window.location.protocol}//${window.location.host}/poll/${createdId}`}
+                  value={`https://pollstr.app/poll/${createdId}`}
                   className="form-item__input form-item__input--clipboard"
                   type="text"
                   name={`url-${createdId}`}
@@ -334,7 +333,7 @@ const CreatePoll = () => {
                   disabled
                 />
                 <CopyToClipboard
-                  text={`${window.location.protocol}//${window.location.host}/poll/${createdId}`}
+                  text={`https://pollstr.app/poll/${createdId}`}
                   onCopy={onCopyHandler}
                 >
                   <span
@@ -351,7 +350,7 @@ const CreatePoll = () => {
               >
                 Or,{" "}
                 <a
-                  href={`${window.location.protocol}//${window.location.host}/poll/${createdId}`}
+                  href={`https://pollstr.app/poll/${createdId}`}
                   onClick={(e) => e.preventDefault()}
                   className="form-switch-action"
                 >

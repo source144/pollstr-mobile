@@ -13,7 +13,7 @@ export default (poll) => {
 	if (poll.poll) poll = poll.poll;
 
 	const copyBtn = useRef();
-	const url = `${window.location.protocol}//${window.location.host}/poll/${poll.id}`;
+	const url = `https://pollstr.app/poll/${poll.id}`;
 
 	const onCopyHandler = (e) => {
 		if (e && typeof e.preventDefault === 'function') e.preventDefault();
