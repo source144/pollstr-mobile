@@ -36,10 +36,14 @@ import Chip from "../Chip/Chip";
 import CountdownTimer from "../CountdownTimer/CountdownTimer";
 import PollOption from "../PollOption/PollOption";
 import SharePoll from "../SharePoll/SharePoll";
-import { IonPopover } from "@ionic/react";
+import { IonLoading, IonPopover } from "@ionic/react";
 import EditPollPopover from "../EditPollPopover/EditPollPopover";
 import { useDispatch, useSelector } from "react-redux";
-import { deletePoll, editPoll, editPollPasscode } from "../../store/actions/managePollsActions";
+import {
+  deletePoll,
+  editPoll,
+  editPollPasscode,
+} from "../../store/actions/managePollsActions";
 
 const error = undefined;
 const selected = undefined;
@@ -238,6 +242,7 @@ const ManagePoll = ({ poll }) => {
         cssClass="my-custom-class"
         onDidDismiss={(e) => setPopoverContent("")}
       >
+        <IonLoading isOpen={form_loading} message={"Please wait..."} />
         {_popover_content}
       </IonPopover>
       {poll && Object.keys(poll).length > 2 ? (

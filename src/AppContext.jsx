@@ -1,3 +1,4 @@
+import { IonLoading } from "@ionic/react";
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { authRefresh, authFingerprint } from "./store/actions/authActions";
@@ -37,6 +38,7 @@ export default ({ children }) => {
 
   return (
     <>
+      <IonLoading isOpen={_loading} message={"Please wait..."} />
       {children}
     </>
   );

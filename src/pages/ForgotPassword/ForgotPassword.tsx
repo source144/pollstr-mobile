@@ -5,6 +5,7 @@ import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
 import { RootStateOrAny, useDispatch, useSelector } from "react-redux";
 import { authResendVerification } from "../../store/actions/authActions";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const emailRegex = /^(([^<>()\[\]\.,;:\s@\"]+(\.[^<>()\[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
 
@@ -81,10 +82,7 @@ const ForgotPassword: React.FC = () => {
         .then((response) => {
           setLoading(false);
           //   TODO : Ionic Toast
-          //   toast("Password reset link sent!", {
-          //     position: "top-center",
-          //     autoClose: 5000,
-          //   });
+          toast("Password reset link sent!", { autoClose: 5000 });
           setRedirect(true);
         })
         .catch((error) => {

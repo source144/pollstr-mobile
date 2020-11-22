@@ -61,6 +61,21 @@
   --ion-tab-bar-color-selected: var(--ion-color-dark-tint); */
 }
 
+.Toastify__toast-container {
+  /* Show underneath side drawer */
+  z-index: 999;
+}
+.Toastify__toast-container.Toastify__toast-container--bottom-right,
+.Toastify__toast-container.Toastify__toast-container--bottom-center,
+.Toastify__toast-container.Toastify__toast-container--bottom-left {
+  /* Show above bottom nav/toolbar */
+  margin-bottom: 50px;
+}
+.toast-secondary {
+  font-size: 12px;
+  font-style: italic;
+}
+
 .popover-wrapper .popover-content {
   width: 80vw;
   max-width: 500px;

@@ -1,7 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import socket from '../socket';
-// import { toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 // TODO : Ionic Toasts
 
 import {
@@ -64,9 +64,7 @@ export const deletePoll = pollId => {
 				dispatch(deletePollSuccess(pollId));
 
 				// Toast user
-				// toast(<>Poll Deleted!</>, {
-				// 	autoClose: 2000,
-				// })
+				toast(<>Poll Deleted!</>, { autoClose: 2000, })
 
 				// Leave Poll Channel
 				socket.emit("leave", `${pollId}`)
@@ -77,9 +75,7 @@ export const deletePoll = pollId => {
 				dispatch(deletePollFailure(errorMsg))
 
 				// Toast user
-				// toast.error(<><strong>Oops!</strong> {errorMsg}</>, {
-				// 	autoClose: 5000,
-				// })
+				toast.error(<><strong>Oops!</strong> {errorMsg}</>, { autoClose: 5000, })
 			});
 	}
 }
@@ -95,9 +91,7 @@ export const editPoll = (pollId, pollData) => {
 				dispatch(editPollSuccess(pollId, pollData));
 
 				// Toast user
-				// toast(<>Poll Saved!</>, {
-				// 	autoClose: 2000,
-				// })
+				toast(<>Poll Saved!</>, { autoClose: 2000, })
 			})
 			.catch(error => {
 				const errorData = error.response ? error.response.data : {};
@@ -105,9 +99,7 @@ export const editPoll = (pollId, pollData) => {
 				dispatch(editPollFailure(errorMsg))
 
 				// Toast user
-				// toast.error(<><strong>Oops!</strong> {errorMsg}</>, {
-				// 	autoClose: 5000,
-				// })
+				toast.error(<><strong>Oops!</strong> {errorMsg}</>, { autoClose: 5000, })
 			});
 	}
 }
@@ -122,9 +114,7 @@ export const editPollPasscode = (pollId, passcode) => {
 				dispatch(editPollPasscodeSuccess(pollId, !!passcode));
 
 				// Toast user
-				// toast(<>Passcode {!!passcode ? 'Updated' : 'Removed'}!</>, {
-				// 	autoClose: 2000,
-				// })
+				toast(<>Passcode {!!passcode ? 'Updated' : 'Removed'}!</>, { autoClose: 2000, })
 			})
 			.catch(error => {
 				const errorData = error.response ? error.response.data : {};

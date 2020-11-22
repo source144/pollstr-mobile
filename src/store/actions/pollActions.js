@@ -2,7 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import socket from '../socket';
 import _ from 'lodash'
-// import { toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 // TODO : Ionic Toasts
 import {
 	CREATE_POLL_REQUEST,
@@ -79,9 +79,7 @@ export const votePoll = (pollId, optionId, passcode = undefined) => {
 				dispatch(votePollSuccess(poll));
 
 				// Toast user
-				// toast.success(<>Vote received!</>, {
-				// 	autoClose: 2000,
-				// })
+				toast.success(<>Vote received!</>, { autoClose: 2000, })
 			})
 			.catch(error => {
 				const errorData = error.response ? error.response.data : {};
@@ -89,9 +87,7 @@ export const votePoll = (pollId, optionId, passcode = undefined) => {
 				dispatch(votePollFailure(errorMsg))
 
 
-				// toast.error(<><strong>Oops!</strong> {errorMsg}</>, {
-				// 	autoClose: 5000,
-				// })
+				toast.error(<><strong>Oops!</strong> {errorMsg}</>, { autoClose: 5000, })
 			});
 	}
 }

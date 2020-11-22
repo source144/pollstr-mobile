@@ -2,6 +2,8 @@ import React from 'react'
 import axios from 'axios';
 import moment from 'moment';
 import { UniqueDeviceIDOriginal, UniqueDeviceID } from "@ionic-native/unique-device-id"
+import { toast } from 'react-toastify'
+
 // TODO : Ionic Toasts
 
 import _ from 'lodash';
@@ -94,7 +96,7 @@ export const authResendVerification = email => {
 				dispatch(authResendVerificationSuccess());
 
 				// Toast user for verification resent
-				// toast('Verification email resent.', { position: "top-center", autoClose: 8000 });
+				toast('Verification email resent.', { autoClose: 8000 });
 			})
 			.catch(error => {
 				const errorData = error.response ? error.response.data : {};
@@ -115,7 +117,7 @@ export const authSignup = auth => {
 				dispatch(authSignupSuccess());
 
 				// Toast user for registration
-				// toast(<>Registartion Successful<br />Check your email for a verification link</>, { position: "top-center", autoClose: 8000 });
+				toast(<>Registartion Successful<br /><span className="toast-secondary">Check your email for a verification link</span></>, { autoClose: 8000 });
 			})
 			.catch(error => {
 				const errorData = error.response ? error.response.data : {};
@@ -150,11 +152,11 @@ export const authLogin = auth => {
 				dispatch(authLoginSuccess(_.omit(authData, ['accessToken', 'refreshToken', 'accessLife', 'refreshLife'])));
 
 				// Toast user for login
-				// const FULL_NAME = authData.firstName || authData.lastName || '';
-				// const FULL_NAME_STR = FULL_NAME ? `, ${FULL_NAME}` : '';
-				// const WELCOME_MSG = `Welcome${authData.lastLogin ? ` Back${FULL_NAME_STR}` : FULL_NAME_STR}!`
-				// const LAST_LOGIN = authData.lastLogin ? <>< br /> Last login {moment(authData.lastLogin).format(DATE_FORMAT)}</> : null;
-				// toast(<>{WELCOME_MSG}{LAST_LOGIN}</>, { position: "top-left" });
+				const FULL_NAME = authData.firstName || authData.lastName || '';
+				const FULL_NAME_STR = FULL_NAME ? `, ${FULL_NAME}` : '';
+				const WELCOME_MSG = `Welcome${authData.lastLogin ? ` Back${FULL_NAME_STR}` : FULL_NAME_STR}!`
+				const LAST_LOGIN = authData.lastLogin ? <>< br /> Last login {moment(authData.lastLogin).format(DATE_FORMAT)}</> : null;
+				toast(<>{WELCOME_MSG}<span className="toast-secondary">{LAST_LOGIN}</span></>);
 				// TODO : set 
 			})
 			.catch(error => {
@@ -201,10 +203,10 @@ export const authRefresh = refresh_token => {
 						dispatch(authRefreshSuccess(response.data));
 
 						// Toast user
-						// const FULL_NAME = response.data.firstName || response.data.lastName || '';
-						// const FULL_NAME_STR = FULL_NAME ? `, ${FULL_NAME}` : '';
-						// const WELCOME_MSG = `Welcome${response.data.lastLogin ? ` Back${FULL_NAME_STR}` : FULL_NAME_STR}!`
-						// toast(<>{WELCOME_MSG}</>, { position: "top-left", });
+						const FULL_NAME = response.data.firstName || response.data.lastName || '';
+						const FULL_NAME_STR = FULL_NAME ? `, ${FULL_NAME}` : '';
+						const WELCOME_MSG = `Welcome${response.data.lastLogin ? ` Back${FULL_NAME_STR}` : FULL_NAME_STR}!`
+						toast(<>{WELCOME_MSG}</>);
 					})
 					.catch(error => {
 						const errorData = error.response ? error.response.data : {};

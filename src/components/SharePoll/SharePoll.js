@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCopy } from "@fortawesome/free-solid-svg-icons";
 import { Link } from 'react-router-dom';
 
-// import { toast } from 'react-toastify'
+import { toast } from 'react-toastify'
 // import Share from '../util/ShareOnMobile'
 
 export default (poll) => {
@@ -18,7 +18,7 @@ export default (poll) => {
 	const onCopyHandler = (e) => {
 		if (e && typeof e.preventDefault === 'function') e.preventDefault();
 
-		// toast('Poll Link Copied!');
+		toast('Poll Link Copied!');
 	}
 
 	// (iOS 14.1 bug - no solution..)

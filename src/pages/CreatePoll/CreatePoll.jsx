@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import { toast } from 'react-toastify'
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import {
   IonButtons,
@@ -271,7 +272,7 @@ const CreatePoll = () => {
   const onCopyHandler = (e) => {
     if (e && typeof e.preventDefault === "function") e.preventDefault();
 
-    // toast('Poll Link Copied!');
+    toast('Poll Link Copied!');
   };
   const handleShareToAppsFallback = () =>
     copyBtn && copyBtn.current && copyBtn.current.click();
