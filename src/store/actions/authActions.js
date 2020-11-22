@@ -1,6 +1,7 @@
 import React from 'react'
 import axios from 'axios';
 import moment from 'moment';
+import { UniqueDeviceIDOriginal, UniqueDeviceID } from "@ionic-native/unique-device-id"
 // TODO : Ionic Toasts
 
 import _ from 'lodash';
@@ -46,11 +47,39 @@ const DATE_FORMAT = "ddd, MMM Do YYYY, hA";
 // 	})
 // });
 
-const authFingerprintSuccess = () => ({ type: AUTH_FINGERPRINT_SUCCESS });
+const authFingerprintSuccess = (fingerprint) => ({ type: AUTH_FINGERPRINT_SUCCESS, fingerprint });
 const authFingerprintFailure = (error, errorMsg) => ({ type: AUTH_FINGERPRINT_FAILURE, error_data: error, error: errorMsg });
 export const authFingerprint = () => {
 	return (dispatch) => {
-		// TODO : get device id
+		// TODO: get device id
+		UniqueDeviceID.get()
+			.then((uuid) => {
+				console.log("Resolve Device UUID", uuid)
+				console.log("Got UUID " + uuid);
+				// Register visitor with API
+				axios.post('/auth/fingerprint', { visitorId: uuid })
+					.then(response => {
+
+						console.log("Success storing Device ID");
+
+						// Add fingerprint to header
+						axios.defaults.headers.common['x-finger-print'] = uuid;
+
+						dispatch(authFingerprintSuccess(uuid))
+					})
+					.catch(error => {
+						console.log("Error storing Device ID");
+						console.log(error);
+						dispatch(authFingerprintFailure(error, "failed to store fingerprint on server"))
+					})
+
+			})
+			.catch((error) => {
+				console.log("Unable to resolve Device UUID", error)
+				dispatch(authFingerprintFailure(error, "Unable to resolve Device UUID"))
+				dispatch(authFingerprintFailure(error, error))
+
+			})
 	}
 }
 

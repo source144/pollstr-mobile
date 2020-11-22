@@ -198,8 +198,7 @@ const Manage: React.FC = () => {
   const hasAuth = !_.isEmpty(auth);
 
   // Prevent API calls until authenticated/identified
-  //   const _prevent_fetch_ = auth_loading || (!fingerprint && !hasAuth);
-  const _prevent_fetch_ = auth_loading || !hasAuth;
+    const _prevent_fetch_ = auth_loading || (!fingerprint && !hasAuth);
 
   useEffect(() => {
     if (!_prevent_fetch_ || true) {
