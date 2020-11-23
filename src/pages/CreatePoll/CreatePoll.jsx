@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { toast } from 'react-toastify'
+import { toast } from "react-toastify";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import {
   IonButtons,
@@ -35,11 +35,10 @@ import CreatePollOption from "../../components/CreatePollOption/CreatePollOption
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
-const responseError = "";
-const errors = {};
-const tempDate = Date.now();
 const currentYear = new Date().getFullYear();
-const title = "";
+const EXPIRY_SELECTOR = ".datetime-text";
+const NO_EXPIRY_PLACEHOLDER = "No Expiry Set";
+const EXPIRY_FORMAT = "D MMM YYYY hh:mm a";
 
 const pwRegex = /^\S+$/;
 const validate = (payload) => {
@@ -98,6 +97,7 @@ const CreatePoll = () => {
 
   const copyBtn = useRef();
 
+  const expiryIonInput = useRef();
   const [responseError, setResponseError] = useState("");
   const [createdId, setCreatedId] = useState(undefined);
   const [title, setTitle] = useState("");
@@ -272,7 +272,7 @@ const CreatePoll = () => {
   const onCopyHandler = (e) => {
     if (e && typeof e.preventDefault === "function") e.preventDefault();
 
-    toast('Poll Link Copied!');
+    toast("Poll Link Copied!");
   };
   const handleShareToAppsFallback = () =>
     copyBtn && copyBtn.current && copyBtn.current.click();
@@ -295,184 +295,223 @@ const CreatePoll = () => {
     // 	})
   };
 
+  const handleExpiryDateChange = (e) => {
+    console.log("Selected Date: ", e.detail.value);
+    const _d = moment(e.detail.value);
+
+    // Change Date that is displayed (in shadow dom)
+    let shadow_PHolder;
+    if (expiryIonInput.current && expiryIonInput.current.shadowRoot) {
+      // <div class=​"datetime-text" part=​"placeholder">​No Expiry Set​</div>​
+      shadow_PHolder = expiryIonInput.current.shadowRoot.querySelector(
+        EXPIRY_SELECTOR
+      );
+    }
+
+    console.log(shadow_PHolder);
+    if (!_d.isValid() || !_d.isAfter(moment())) {
+      setExpireDate("");
+
+      if (shadow_PHolder) shadow_PHolder.innerHTML = NO_EXPIRY_PLACEHOLDER;
+    } else {
+      setExpireDate(e.detail.value);
+
+      if (shadow_PHolder)
+        shadow_PHolder.innerHTML = moment(e.detail.value).format(EXPIRY_FORMAT);
+    }
+  };
+
   return (
-    <div className="form-form-wrapper poll-create-form">
-      {createdId ? (
-        // ------------------ //
-        //   Create Success   //
-        // ------------------ //
-        <>
-          <h1 className="form-title">Poll Created</h1>
-          <div
-            onSubmit={(e) => {
-              e.preventDefault();
-            }}
-            formNoValidate
-            className="form-form"
-          >
-            <div className="form-switch form-switch--center poll-created-description">
-              Use this QR Code to{" "}
-              <Link to={`/poll/${createdId}`} className="form-switch-action">
-                Acces Poll
-              </Link>
-            </div>
-            <div className="poll-created-qr">
-              <QRCode
-                value={`https://pollstr.app/poll/${createdId}`}
-                size={200}
-              />
-            </div>
-            {/* <div className="form-switch form-switch--center poll-created-description">Or, use copy the following link</div> */}
-            <div className="form-item form-item--clipboard">
-              <div className="form-item-wrapper">
-                <input
+    <div
+      style={{
+        display: "flex",
+        minHeight: "100%",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <div
+        className="form-form-wrapper poll-create-form"
+        style={{ width: "100%" }}
+      >
+        {createdId ? (
+          // ------------------ //
+          //   Create Success   //
+          // ------------------ //
+          <>
+            <h1 className="form-title">Poll Created</h1>
+            <div
+              onSubmit={(e) => {
+                e.preventDefault();
+              }}
+              formNoValidate
+              className="form-form"
+            >
+              <div className="form-switch form-switch--center poll-created-description">
+                Use this QR Code to{" "}
+                <Link to={`/poll/${createdId}`} className="form-switch-action">
+                  Acces Poll
+                </Link>
+              </div>
+              <div className="poll-created-qr">
+                <QRCode
                   value={`https://pollstr.app/poll/${createdId}`}
-                  className="form-item__input form-item__input--clipboard"
-                  type="text"
-                  name={`url-${createdId}`}
-                  formNoValidate
-                  disabled
+                  size={200}
                 />
-                <CopyToClipboard
-                  text={`https://pollstr.app/poll/${createdId}`}
-                  onCopy={onCopyHandler}
-                >
-                  <span
-                    ref={copyBtn}
-                    className="form-item__input-icon form-item__input-icon--clipboard"
+              </div>
+              {/* <div className="form-switch form-switch--center poll-created-description">Or, use copy the following link</div> */}
+              <div className="form-item form-item--clipboard">
+                <div className="form-item-wrapper">
+                  <input
+                    value={`https://pollstr.app/poll/${createdId}`}
+                    className="form-item__input form-item__input--clipboard"
+                    type="text"
+                    name={`url-${createdId}`}
+                    formNoValidate
+                    disabled
+                  />
+                  <CopyToClipboard
+                    text={`https://pollstr.app/poll/${createdId}`}
+                    onCopy={onCopyHandler}
                   >
-                    <FontAwesomeIcon icon={faCopy} />
-                  </span>
-                </CopyToClipboard>
-              </div>
-              <div
-                onClick={handleShareToApps}
-                className="form-switch form-switch--center poll-created-description"
-              >
-                Or,{" "}
-                <a
-                  href={`https://pollstr.app/poll/${createdId}`}
-                  onClick={(e) => e.preventDefault()}
-                  className="form-switch-action"
+                    <span
+                      ref={copyBtn}
+                      className="form-item__input-icon form-item__input-icon--clipboard"
+                    >
+                      <FontAwesomeIcon icon={faCopy} />
+                    </span>
+                  </CopyToClipboard>
+                </div>
+                <div
+                  onClick={handleShareToApps}
+                  className="form-switch form-switch--center poll-created-description"
                 >
-                  share to other Apps
-                </a>
+                  Or,{" "}
+                  <a
+                    href={`https://pollstr.app/poll/${createdId}`}
+                    onClick={(e) => e.preventDefault()}
+                    className="form-switch-action"
+                  >
+                    share to other Apps
+                  </a>
+                </div>
+              </div>
+              <div className="form-item">
+                <input
+                  className="btn btn--tertiary form-item__submit"
+                  type="submit"
+                  value="Create Another!"
+                  onClick={() => setCreatedId("")}
+                />
               </div>
             </div>
-            <div className="form-item">
-              <input
-                className="btn btn--tertiary form-item__submit"
-                type="submit"
-                value="Create Another!"
-                onClick={() => setCreatedId("")}
-              />
-            </div>
-          </div>
-        </>
-      ) : (
-        // -------------------- //
-        //   Create Poll Form   //
-        // -------------------- //
-        <>
-          <h1 className="form-title">Create Poll</h1>
-          <div onSubmit={handleSubmit} formNoValidate className="form-form">
-            {/* General Information */}
-            <div className="form-item">
-              <label htmlFor="title" className="required">
-                Poll Title
-              </label>
-              <div className="form-item-wrapper">
+          </>
+        ) : (
+          // -------------------- //
+          //   Create Poll Form   //
+          // -------------------- //
+          <>
+            <h1 className="form-title">Create Poll</h1>
+            <div onSubmit={handleSubmit} formNoValidate className="form-form">
+              {/* General Information */}
+              <div className="form-item">
+                <label htmlFor="title" className="required">
+                  Poll Title
+                </label>
+                <div className="form-item-wrapper">
+                  <HashtagTextArea
+                    className={`form-item__input ${
+                      !!errors.title ? "form-item__input--err" : ""
+                    }`}
+                    placeholder="e.g. Apples or Bananas? #Fruit"
+                    tagClass="form-item__input--hashtag"
+                    onChange={handleTitle}
+                    singleline={true}
+                  />
+                </div>
+                {!!errors.title ? (
+                  <span className="form-item__error">{errors.title}</span>
+                ) : null}
+              </div>
+              <div className="form-item">
+                <label htmlFor="description">Description</label>
+                {/* <div className='form-item-wrapper'> */}
                 <HashtagTextArea
-                  className={`form-item__input ${
-                    !!errors.title ? "form-item__input--err" : ""
+                  className={`form-item__input form-item__input--textarea ${
+                    !!errors.description ? "form-item__input--err" : ""
                   }`}
-                  placeholder="e.g. Apples or Bananas? #Fruit"
+                  placeholder="e.g. Let's settle this once and for all! Which #fruit is better? Apples or Bananas?"
                   tagClass="form-item__input--hashtag"
-                  onChange={handleTitle}
-                  singleline={true}
+                  newlines={true}
+                  onChange={handleDescription}
                 />
+                {/* </div> */}
+                {!!errors.description ? (
+                  <span className="form-item__error">{errors.description}</span>
+                ) : null}
               </div>
-              {!!errors.title ? (
-                <span className="form-item__error">{errors.title}</span>
-              ) : null}
-            </div>
-            <div className="form-item">
-              <label htmlFor="description">Description</label>
-              {/* <div className='form-item-wrapper'> */}
-              <HashtagTextArea
-                className={`form-item__input form-item__input--textarea ${
-                  !!errors.description ? "form-item__input--err" : ""
-                }`}
-                placeholder="e.g. Let's settle this once and for all! Which #fruit is better? Apples or Bananas?"
-                tagClass="form-item__input--hashtag"
-                newlines={true}
-                onChange={handleDescription}
-              />
-              {/* </div> */}
-              {!!errors.description ? (
-                <span className="form-item__error">{errors.description}</span>
-              ) : null}
-            </div>
-            {/* Poll Options */}
-            <div className="form-item">
-              <label className="required">Options</label>
-              {!!errors.options ? (
-                <span className="form-item__error">{errors.options}</span>
-              ) : null}
-              <IonReorderGroup disabled={false} onIonItemReorder={doReorder}>
-                {options.map((option, idx) => (
-                  //   <IonItem
-                  <div
-                    className="option-item"
-                    key={option.id}
-                    style={{ border: "none" }}
-                  >
-                    <IonReorder slot="start" class="option-reorder" />
-                    <CreatePollOption
-                      id={option.id}
-                      index={idx}
-                      hasError={option.error}
-                      deleteable={options.length > 2}
-                      onChange={onOptionChange}
-                      onDelete={onOptionDelete}
-                      value={option.value}
-                    />
-                  </div>
-                  //   </IonItem>
-                ))}
-              </IonReorderGroup>
-              <div className="poll__add-option">
-                <button className="btn btn--primary" onClick={onOptionAdd}>
-                  <FontAwesomeIcon icon={faPlusCircle} />
-                </button>
+              {/* Poll Options */}
+              <div className="form-item">
+                <label className="required">Options</label>
+                {!!errors.options ? (
+                  <span className="form-item__error">{errors.options}</span>
+                ) : null}
+                <IonReorderGroup disabled={false} onIonItemReorder={doReorder}>
+                  {options.map((option, idx) => (
+                    //   <IonItem
+                    <div
+                      className="option-item"
+                      key={option.id}
+                      style={{ border: "none" }}
+                    >
+                      <IonReorder slot="start" class="option-reorder" />
+                      <CreatePollOption
+                        id={option.id}
+                        index={idx}
+                        hasError={option.error}
+                        deleteable={options.length > 2}
+                        onChange={onOptionChange}
+                        onDelete={onOptionDelete}
+                        value={option.value}
+                      />
+                    </div>
+                    //   </IonItem>
+                  ))}
+                </IonReorderGroup>
+                <div className="poll__add-option">
+                  <button className="btn btn--primary" onClick={onOptionAdd}>
+                    <FontAwesomeIcon icon={faPlusCircle} />
+                  </button>
+                </div>
               </div>
-            </div>
-            {/* Expiry and Poll Settings */}
-            <div className="form-item">
-              <IonDatetime
-                displayFormat="D MMM YYYY hh:mm a"
-                min={currentYear}
-                max={currentYear + 5}
-                value={tempDate}
-                onIonChange={(e) => {} /* setSelectedDate(e.detail.value!) */}
-                // pickerOptions={{
-                //   ...IonDatetime.defaultProps.pickerOptions,
-                //   buttons: [
-                //     {
-                //       text: "Clear",
-                //       handler: () => console.log("Clicked Clear!"),
-                //     },
-                //     ...IonDatetime.defaultProps.pickerOptions.buttons,
-                //   ],
-                // }}
-                // onBlur={} TODO : clear value if invalid
-                placeholder="No Expiry Set"
-                className={`form-item__input ${
-                  !!errors.passcode ? "form-item__input--err" : ""
-                }`}
-              ></IonDatetime>
-            </div>
-            {/* <div className="form-item form-item--no-margin form--mb1">
+              {/* Expiry and Poll Settings */}
+              <div className="form-item">
+                <label htmlFor="expiry">Exipre Date</label>
+                <IonDatetime
+                  ref={expiryIonInput}
+                  name="expiry"
+                  displayFormat={EXPIRY_FORMAT}
+                  min={currentYear}
+                  max={currentYear + 5}
+                  onIonChange={handleExpiryDateChange}
+                  // pickerOptions={{
+                  //   ...IonDatetime.defaultProps.pickerOptions,
+                  //   buttons: [
+                  //     {
+                  //       text: "Clear",
+                  //       handler: () => console.log("Clicked Clear!"),
+                  //     },
+                  //     ...IonDatetime.defaultProps.pickerOptions.buttons,
+                  //   ],
+                  // }}
+                  // onBlur={} TODO : clear value if invalid
+                  placeholder={NO_EXPIRY_PLACEHOLDER}
+                  className={`form-item__input ${
+                    !!errors.passcode ? "form-item__input--err" : ""
+                  }`}
+                ></IonDatetime>
+              </div>
+              {/* <div className="form-item form-item--no-margin form--mb1">
           <label htmlFor="expire" className="rw-datepicker-label">
             Expire Date
           </label>
@@ -484,132 +523,133 @@ const CreatePoll = () => {
             placeholder="No Exipiry Set"
           />
         </div> */}
-            <div className="form-item">
-              <label htmlFor="passcode">Passcode</label>
-              <p className="optional">Require a passcode for every vote</p>
-              <div className="form-item-wrapper">
-                <input
-                  className={`form-item__input ${
-                    !!errors.passcode ? "form-item__input--err" : ""
-                  }`}
-                  type="password"
-                  placeholder="e.g. *******"
-                  name="passcode"
-                  formNoValidate
-                  onChange={handlePasscode}
+              <div className="form-item">
+                <label htmlFor="passcode">Passcode</label>
+                <p className="optional">Require a passcode for every vote</p>
+                <div className="form-item-wrapper">
+                  <input
+                    className={`form-item__input ${
+                      !!errors.passcode ? "form-item__input--err" : ""
+                    }`}
+                    type="password"
+                    placeholder="e.g. *******"
+                    name="passcode"
+                    formNoValidate
+                    onChange={handlePasscode}
+                  />
+                </div>
+                {!!errors.passcode ? (
+                  <span className="form-item__error">{errors.passcode}</span>
+                ) : null}
+              </div>
+              <div className="form-item">
+                <label htmlFor="tags">Tags</label>
+                <div className="form-item-wrapper">
+                  <input
+                    className={`form-item__input ${
+                      !!errors.tags ? "form-item__input--err" : ""
+                    }`}
+                    type="text"
+                    placeholder="e.g. #Food #Health"
+                    name="tags"
+                    formNoValidate
+                    onChange={handleTags}
+                  />
+                  <span className="form-item__input-icon">
+                    <FontAwesomeIcon icon={faTags} />
+                  </span>
+                </div>
+                {!!errors.tags ? (
+                  <span className="form-item__error">{errors.tags}</span>
+                ) : null}
+              </div>
+              <div className="form-item form-item--row">
+                <label
+                  className="form-item__multiline-label"
+                  htmlFor="resultsHidden"
+                  onClick={() => setResultsHidden(!resultsHidden)}
+                >
+                  <span className="form-item__multiline-label-title">
+                    Hidden Results
+                  </span>
+                  <span className="form-item__multiline-label-description">
+                    Visible only after voting?
+                  </span>
+                </label>
+                <Switch
+                  checked={resultsHidden}
+                  onChange={() => setResultsHidden(!resultsHidden)}
+                  name="resultsHidden"
                 />
               </div>
-              {!!errors.passcode ? (
-                <span className="form-item__error">{errors.passcode}</span>
-              ) : null}
-            </div>
-            <div className="form-item">
-              <label htmlFor="tags">Tags</label>
-              <div className="form-item-wrapper">
-                <input
-                  className={`form-item__input ${
-                    !!errors.tags ? "form-item__input--err" : ""
-                  }`}
-                  type="text"
-                  placeholder="e.g. #Food #Health"
-                  name="tags"
-                  formNoValidate
-                  onChange={handleTags}
+              <div className="form-item form-item--row">
+                <label
+                  className="form-item__multiline-label"
+                  htmlFor="allowGuests"
+                  onClick={() =>
+                    isLoggedIn ? setAllowGuests(!allowGuests) : undefined
+                  }
+                >
+                  <span className="form-item__multiline-label-title">
+                    Guest Votes
+                  </span>
+                  <span className="form-item__multiline-label-description">
+                    Can guests vote?
+                  </span>
+                </label>
+                <Switch
+                  checked={allowGuests}
+                  onChange={() => setAllowGuests(!allowGuests)}
+                  name="allowGuests"
+                  disabled={!isLoggedIn}
                 />
-                <span className="form-item__input-icon">
-                  <FontAwesomeIcon icon={faTags} />
-                </span>
               </div>
-              {!!errors.tags ? (
-                <span className="form-item__error">{errors.tags}</span>
+              <div className="form-item form-item--row">
+                <label
+                  className="form-item__multiline-label"
+                  htmlFor="publicPoll"
+                  onClick={() => setPublicPoll(!publicPoll)}
+                >
+                  <span className="form-item__multiline-label-title">
+                    Public Poll
+                  </span>
+                  <span className="form-item__multiline-label-description">
+                    Should the poll be featured?
+                  </span>
+                </label>
+                <Switch
+                  checked={publicPoll}
+                  onChange={() => setPublicPoll(!publicPoll)}
+                  name="publicPoll"
+                />
+              </div>
+              {!!responseError ? (
+                <div className="form-item__error">{responseError}</div>
               ) : null}
-            </div>
-            <div className="form-item form-item--row">
-              <label
-                className="form-item__multiline-label"
-                htmlFor="resultsHidden"
-                onClick={() => setResultsHidden(!resultsHidden)}
+              <div
+                className="form-item"
+                //   style={!isMobile ? { marginRight: "-1rem" } : {}}
               >
-                <span className="form-item__multiline-label-title">
-                  Hidden Results
-                </span>
-                <span className="form-item__multiline-label-description">
-                  Visible only after voting?
-                </span>
-              </label>
-              <Switch
-                checked={resultsHidden}
-                onChange={() => setResultsHidden(!resultsHidden)}
-                name="resultsHidden"
-              />
+                <input
+                  className={`btn btn--tertiary form-item__submit ${
+                    !!errors.confirm ? "form-item__input--err" : ""
+                  }`}
+                  type="submit"
+                  value="Create!"
+                  onClick={handleSubmit}
+                  disabled={
+                    !title ||
+                    !_.filter(
+                      options,
+                      (option) => !!option.value && !!option.value.trim()
+                    ).length >= 2
+                  }
+                />
+              </div>
             </div>
-            <div className="form-item form-item--row">
-              <label
-                className="form-item__multiline-label"
-                htmlFor="allowGuests"
-                onClick={() =>
-                  !isLoggedIn ? setResultsHidden(!allowGuests) : undefined
-                }
-              >
-                <span className="form-item__multiline-label-title">
-                  Guest Votes
-                </span>
-                <span className="form-item__multiline-label-description">
-                  Can guests vote?
-                </span>
-              </label>
-              <Switch
-                checked={allowGuests}
-                onChange={() => setAllowGuests(!allowGuests)}
-                name="allowGuests"
-                disabled={!isLoggedIn}
-              />
-            </div>
-            <div className="form-item form-item--row">
-              <label
-                className="form-item__multiline-label"
-                htmlFor="publicPoll"
-                onClick={() => setPublicPoll(!publicPoll)}
-              >
-                <span className="form-item__multiline-label-title">
-                  Public Poll
-                </span>
-                <span className="form-item__multiline-label-description">
-                  Should the poll be featured?
-                </span>
-              </label>
-              <Switch
-                checked={publicPoll}
-                onChange={() => setPublicPoll(!publicPoll)}
-                name="publicPoll"
-              />
-            </div>
-            {!!responseError ? (
-              <div className="form-item__error">{responseError}</div>
-            ) : null}
-            <div
-              className="form-item"
-              //   style={!isMobile ? { marginRight: "-1rem" } : {}}
-            >
-              <input
-                className={`btn btn--tertiary form-item__submit ${
-                  !!errors.confirm ? "form-item__input--err" : ""
-                }`}
-                type="submit"
-                value="Create!"
-                onClick={handleSubmit}
-                disabled={
-                  !title ||
-                  !_.filter(
-                    options,
-                    (option) => !!option.value && !!option.value.trim()
-                  ).length >= 2
-                }
-              />
-            </div>
-          </div>
-        </>
-      )}
+          </>
+        )}
+      </div>
     </div>
   );
 };

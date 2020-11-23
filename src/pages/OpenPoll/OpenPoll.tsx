@@ -49,10 +49,8 @@ const OpenPoll: React.FC = () => {
             const split = text.split("https://www.pollstr.app");
 
             if (split.length > 1 && split[1]) {
-              toast("Opening Poll..", { autoClose: 1000 });
-              setTimeout(() => {
-                setRedirect(split[1]);
-              }, 5000);
+            //   toast("Resolving Poll..", { autoClose: 3000 });
+              setRedirect(`${split[1]}`);
             } else {
               toast.error("Invalid QR Code");
               history.goBack();
@@ -84,7 +82,7 @@ const OpenPoll: React.FC = () => {
       if (shouldCleanup) {
         preview(false);
         QRScanner.hide();
-        // QRScanner.destroy();
+        QRScanner.destroy();
 
         if (_qrScanner_subscriber) {
           _qrScanner_subscriber.unsubscribe();

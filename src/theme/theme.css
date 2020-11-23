@@ -101,6 +101,7 @@ ion-back-button {
 .form-item__input .datetime-text {
   margin-top: 3px;
 }
+ion-datetime.form-item__input::part(text),
 ion-datetime.form-item__input::part(placeholder) {
   margin-top: 3px;
 }

@@ -7,15 +7,14 @@ import _ from "lodash";
 
 import Switch from "react-ios-switch";
 import { IonDatetime } from "@ionic/react";
+import { useSelector } from "react-redux";
 // import LoadingOverlay from 'react-loading-overlay';
 // import { PushSpinner } from 'react-spinners-kit'
 
-const responseError = "";
-const errors = {};
-const tempDate = Date.now();
 const currentYear = new Date().getFullYear();
-const isLoggedIn = false;
-const title = "";
+const EXPIRY_SELECTOR = ".datetime-text";
+const NO_EXPIRY_PLACEHOLDER = "No Expiry Set";
+const EXPIRY_FORMAT = "D MMM YYYY hh:mm a";
 
 const EditPollPopover = ({
   poll,
@@ -23,12 +22,14 @@ const EditPollPopover = ({
   error = undefined,
   onSubmit = undefined,
 }) => {
-  // const { auth, global_loading: auth_loading } = useSelector(state => state.auth);
-  //   const isLoggedIn = !_.isEmpty(auth);
-  const isLoggedIn = false;
+  const { auth, global_loading: auth_loading } = useSelector(
+    (state) => state.auth
+  );
+  const isLoggedIn = !_.isEmpty(auth);
 
   console.log("POLL", poll);
 
+  const expiryIonInput = useRef();
   const [submitted, setSubmitted] = useState(false);
   const [tags, setTags] = useState(
     poll.specifiedTags
@@ -94,6 +95,32 @@ const EditPollPopover = ({
     }
   };
 
+  const handleExpiryDateChange = (e) => {
+    console.log("Selected Date: ", e.detail.value);
+    const _d = moment(e.detail.value);
+
+    // Change Date that is displayed (in shadow dom)
+    let shadow_PHolder;
+    if (expiryIonInput.current && expiryIonInput.current.shadowRoot) {
+      // <div class=​"datetime-text" part=​"placeholder">​No Expiry Set​</div>​
+      shadow_PHolder = expiryIonInput.current.shadowRoot.querySelector(
+        EXPIRY_SELECTOR
+      );
+    }
+
+    console.log(shadow_PHolder);
+    if (!_d.isValid() || !_d.isAfter(moment())) {
+      setExpireDate("");
+
+      if (shadow_PHolder) shadow_PHolder.innerHTML = NO_EXPIRY_PLACEHOLDER;
+    } else {
+      setExpireDate(e.detail.value);
+
+      if (shadow_PHolder)
+        shadow_PHolder.innerHTML = moment(e.detail.value).format(EXPIRY_FORMAT);
+    }
+  };
+
   useEffect(() => {
     if (submitted && !loading && !error) {
       setTags(poll.specifiedTags);
@@ -121,14 +148,14 @@ const EditPollPopover = ({
         <div onSubmit={handleSubmit} formNoValidate className="form-form">
           {/* Expiry and Poll Settings */}
           <div className="form-item">
+            <label htmlFor="expiry">Exipre Date</label>
             <IonDatetime
-              displayFormat="D MMM YYYY hh:mm a"
+              ref={expiryIonInput}
+              displayFormat={EXPIRY_FORMAT}
               min={currentYear}
               max={currentYear + 5}
               value={expireDate}
-              onIonChange={(e) => {
-                setExpireDate(e.detail.value);
-              }}
+              onIonChange={handleExpiryDateChange}
               // pickerOptions={{
               //   ...IonDatetime.defaultProps.pickerOptions,
               //   buttons: [
@@ -140,7 +167,7 @@ const EditPollPopover = ({
               //   ],
               // }}
               // onBlur={} TODO : clear value if invalid
-              placeholder="No Expiry Set"
+              placeholder={NO_EXPIRY_PLACEHOLDER}
               className={`form-item__input ${
                 !!errors.passcode ? "form-item__input--err" : ""
               }`}
@@ -194,7 +221,7 @@ const EditPollPopover = ({
               className="form-item__multiline-label"
               htmlFor="allowGuests"
               onClick={() =>
-                !isLoggedIn ? setResultsHidden(!allowGuests) : undefined
+                isLoggedIn ? setAllowGuests(!allowGuests) : undefined
               }
             >
               <span className="form-item__multiline-label-title">
