@@ -6,6 +6,7 @@ import {
   logInOutline,
   logOutOutline,
   personAddOutline,
+  scanOutline,
 } from "ionicons/icons";
 import {
   IonContent,
@@ -24,7 +25,9 @@ import _ from "lodash";
 import { authLogout } from "../../store/actions/authActions";
 
 const Navbar: React.FC = () => {
-  const { auth, global_loading } = useSelector((state: RootStateOrAny) => state.auth);
+  const { auth, global_loading } = useSelector(
+    (state: RootStateOrAny) => state.auth
+  );
   const dispatch = useDispatch();
   const hasAuth = !_.isEmpty(auth);
   console.log("auth", auth);
@@ -34,7 +37,9 @@ const Navbar: React.FC = () => {
     ? auth.firstName
       ? auth.firstName
       : auth.email
-    : (hasAuth ? "User" : "Guest");
+    : hasAuth
+    ? "User"
+    : "Guest";
   return (
     <IonMenu contentId="main">
       <IonHeader>
@@ -62,10 +67,15 @@ const Navbar: React.FC = () => {
               <IonLabel>Create</IonLabel>
             </IonItem>
           </IonMenuToggle>
-
           {hasAuth ? (
             <IonMenuToggle>
-              <IonItem detail={false} button onClick={() => { dispatch(authLogout()); }}>
+              <IonItem
+                detail={false}
+                button
+                onClick={() => {
+                  dispatch(authLogout());
+                }}
+              >
                 <IonIcon slot="start" icon={logOutOutline} />
                 <IonLabel>Log Out</IonLabel>
               </IonItem>

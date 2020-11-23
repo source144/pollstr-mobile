@@ -4,8 +4,10 @@ import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCopy } from "@fortawesome/free-solid-svg-icons";
 import { Link } from 'react-router-dom';
-
 import { toast } from 'react-toastify'
+import { Plugins } from '@capacitor/core';
+const { Share } = Plugins;
+
 // import Share from '../util/ShareOnMobile'
 
 export default (poll) => {
@@ -28,27 +30,22 @@ export default (poll) => {
 
 	const handleShareToApps = (e) => {
 		if (e && typeof e.preventDefault === 'function') e.preventDefault();
-		const shareData = {
+		
+		const shareOptions = {
+			dialogTitle: "Share Poll With Buddies",
 			title: poll.title,
 			text: poll.title ? [poll.title, ''].join('\n') : 'Check out this poll!\n',
 			url: url,
-		}
+		};
 
-		// Share(shareData, handleShareToAppsFallback)
-		// 	.then(() => {
-		// 		// Succesfully sharing to other apps
-		// 		console.log("Share opened")
-		// 	})
-		// 	.catch((e) => {
-		// 		// Share API failed
-		// 		console.log("Share failed", e);
-		// 	})
+		Share.share(shareOptions).catch(handleShareToAppsFallback);
 	}
+
 	return (
 		// <div className="form-centered-container">
 		<div className="form-form-wrapper">
 			<div onSubmit={(e) => { e.preventDefault() }} formNoValidate className='form-form'>
-				<div className="form-switch form-switch--center poll-created-description">Use this QR Code to <Link to={`/poll/${poll.id}`} className='form-switch-action'>Acces Poll</Link></div>
+				<div className="form-switch form-switch--center poll-created-description">Use this QR Code to <Link to={`/poll/${poll.id}`} className='form-switch-action'>Access Poll</Link></div>
 				<div className="poll-created-qr">
 					<QRCode value={url} size={200} />
 				</div>
@@ -71,10 +68,7 @@ export default (poll) => {
 					</div>
 				</div>
 			</div>
-			<div
-				onClick={handleShareToApps}
-				className="form-switch form-switch--center poll-created-description">
-				Or, <a href={url} onClick={e => e.preventDefault()} className='form-switch-action'>share to other Apps</a></div>
+			<div className="form-switch form-switch--center poll-created-description">Or, <a href={url} onClick={handleShareToApps} className='form-switch-action'>share to other Apps</a></div>
 		</div>
 		// </div >
 	)
