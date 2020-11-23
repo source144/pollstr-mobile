@@ -4,7 +4,7 @@ import { QRScanner, QRScannerStatus } from "@ionic-native/qr-scanner";
 import { toast } from "react-toastify";
 
 const MONGO_ID_REG = /^[a-fA-F0-9]{24}$/;
-let qrScanner: any;
+let _qrScanner_subscriber: any;
 
 const preview = (show: boolean): void => {
   if (show) {
@@ -25,21 +25,25 @@ const OpenPoll: React.FC = () => {
   const [redirect, setRedirect] = useState("");
 
   useEffect(() => {
+    let shouldCleanup = false;
+    console.log("shouldCleanup initial state:", shouldCleanup);
+
     QRScanner.prepare()
       .then((status: QRScannerStatus) => {
         if (status.authorized) {
+          shouldCleanup = true;
           preview(true);
 
           // camera permission was granted
           QRScanner.show();
 
-          if (qrScanner) {
-            qrScanner.unsubscribe();
-            qrScanner = undefined;
+          if (_qrScanner_subscriber) {
+            _qrScanner_subscriber.unsubscribe();
+            _qrScanner_subscriber = undefined;
           }
           // start scanning
-          qrScanner = QRScanner.scan().subscribe((text: string) => {
-            preview(false);
+          _qrScanner_subscriber = QRScanner.scan().subscribe((text: string) => {
+            // preview(false);
 
             let id: string;
             const split = text.split("https://www.pollstr.app");
@@ -47,12 +51,10 @@ const OpenPoll: React.FC = () => {
             if (split.length > 1 && split[1]) {
               toast("Opening Poll..", { autoClose: 1000 });
               setTimeout(() => {
-                qrScanner.hide();
                 setRedirect(split[1]);
               }, 5000);
             } else {
               toast.error("Invalid QR Code");
-              qrScanner.hide();
               history.goBack();
             }
           });
@@ -73,11 +75,24 @@ const OpenPoll: React.FC = () => {
       })
       .catch((reason: any) => {
         // TODO : Display toast
-        qrScanner.hide();
         console.log("QR Error Occured", reason);
         toast.error("QR Error Occrured");
         history.goBack();
       });
+
+    return () => {
+      if (shouldCleanup) {
+        preview(false);
+        QRScanner.hide();
+        // QRScanner.destroy();
+
+        if (_qrScanner_subscriber) {
+          _qrScanner_subscriber.unsubscribe();
+          _qrScanner_subscriber = undefined;
+        }
+      }
+      console.log("shouldCleanup  final state:", shouldCleanup);
+    };
   }, []);
 
   if (!!redirect) return <Redirect to={redirect} />;
