@@ -38,17 +38,17 @@ const EditPollPopover = ({
         : poll.specifiedTags.join(" ")
       : ""
   );
-  const [resultsHidden, setResultsHidden] = useState(poll.hideResults);
-  const [allowGuests, setAllowGuests] = useState(!poll.usersOnly);
-  const [publicPoll, setPublicPoll] = useState(poll.public);
-  const [expireDate, setExpireDate] = useState(
+  const DEFAULT_EXPIRE_DATE =
     poll.timeToLive > 0
       ? moment
           .unix(moment(poll.createDate).unix() + poll.timeToLive)
           .toDate()
           .toUTCString()
-      : ""
-  );
+      : "";
+  const [resultsHidden, setResultsHidden] = useState(poll.hideResults);
+  const [allowGuests, setAllowGuests] = useState(!poll.usersOnly);
+  const [publicPoll, setPublicPoll] = useState(poll.public);
+  const [expireDate, setExpireDate] = useState(DEFAULT_EXPIRE_DATE);
 
   console.log(poll.specifiedTags);
 
@@ -110,7 +110,7 @@ const EditPollPopover = ({
 
     console.log(shadow_PHolder);
     if (!_d.isValid() || !_d.isAfter(moment())) {
-      setExpireDate("");
+      setExpireDate(DEFAULT_EXPIRE_DATE);
 
       if (shadow_PHolder) shadow_PHolder.innerHTML = NO_EXPIRY_PLACEHOLDER;
     } else {
