@@ -71,6 +71,14 @@
   /* Show above bottom nav/toolbar */
   margin-bottom: 50px;
 }
+
+ion-app.cameraView,
+ion-app.cameraView ion-content,
+ion-app.cameraView .nav-decor {
+  background: transparent none !important;
+  --background: transparent none !important;
+}
+
 .toast-secondary {
   font-size: 12px;
   font-style: italic;

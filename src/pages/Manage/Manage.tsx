@@ -265,7 +265,7 @@ const Manage: React.FC = () => {
             </div>
           </>
         ) : (
-          <h3>Manage Poll Place holder</h3>
+          <></>
         )}
       </div>
     </>

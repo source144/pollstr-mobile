@@ -2,9 +2,23 @@ import React, { useEffect, useState } from "react";
 import { Redirect, useHistory } from "react-router-dom";
 import { QRScanner, QRScannerStatus } from "@ionic-native/qr-scanner";
 import { toast } from "react-toastify";
-import { cordova } from "@ionic-native/core";
 
 const MONGO_ID_REG = /^[a-fA-F0-9]{24}$/;
+let qrScanner: any;
+
+const preview = (show: boolean): void => {
+  if (show) {
+    (window.document.querySelector("ion-app") as HTMLElement).classList.add(
+      "cameraView"
+    );
+    window.document.body.style.backgroundColor = "transparent";
+  } else {
+    (window.document.querySelector("ion-app") as HTMLElement).classList.remove(
+      "cameraView"
+    );
+    window.document.body.style.backgroundColor = "#FFF";
+  }
+};
 
 const OpenPoll: React.FC = () => {
   const history = useHistory();
@@ -14,26 +28,33 @@ const OpenPoll: React.FC = () => {
     QRScanner.prepare()
       .then((status: QRScannerStatus) => {
         if (status.authorized) {
-          QRScanner.show();
+          preview(true);
 
           // camera permission was granted
-          let qrScanner = QRScanner.scan().subscribe((text: string) => {
+          QRScanner.show();
+
+          if (qrScanner) {
+            qrScanner.unsubscribe();
+            qrScanner = undefined;
+          }
+          // start scanning
+          qrScanner = QRScanner.scan().subscribe((text: string) => {
+            preview(false);
+
             let id: string;
             const split = text.split("https://www.pollstr.app");
 
             if (split.length > 1 && split[1]) {
               toast("Opening Poll..", { autoClose: 1000 });
               setTimeout(() => {
+                qrScanner.hide();
                 setRedirect(split[1]);
-              }, 500);
+              }, 5000);
             } else {
               toast.error("Invalid QR Code");
-              //   history.goBack();
+              qrScanner.hide();
+              history.goBack();
             }
-
-            qrScanner.unsubscribe();
-            QRScanner.hide();
-            QRScanner.destroy();
           });
         } else if (status.denied) {
           // camera permission was permanently denied
@@ -52,19 +73,16 @@ const OpenPoll: React.FC = () => {
       })
       .catch((reason: any) => {
         // TODO : Display toast
+        qrScanner.hide();
         console.log("QR Error Occured", reason);
         toast.error("QR Error Occrured");
         history.goBack();
       });
-  });
+  }, []);
 
   if (!!redirect) return <Redirect to={redirect} />;
 
-  return (
-    <>
-      <h2>Scan QR Code</h2>
-    </>
-  );
+  return <></>;
 };
 
 export default OpenPoll;

@@ -373,7 +373,7 @@ const ManagePoll = ({ poll }) => {
       error ? (
         <h1>{error}</h1>
       ) : (
-        <h3>PLACE-HOLDER</h3>
+        <></>
       )}
     </>
   );
