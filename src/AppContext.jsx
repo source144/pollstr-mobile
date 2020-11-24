@@ -1,7 +1,8 @@
 import { IonLoading } from "@ionic/react";
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { authRefresh, authFingerprint } from "./store/actions/authActions";
+import { ensureConnection } from "./store/socket";
 
 export default ({ children }) => {
   const dispatch = useDispatch();
@@ -34,6 +35,9 @@ export default ({ children }) => {
 
     // Refresh auth token
     if (refresh) dispatch(authRefresh(refresh));
+
+    const rListener = document.addEventListener("resume", ensureConnection);
+    return document.removeEventListener("resume", rListener);
   }, []);
 
   return (
