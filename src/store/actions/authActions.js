@@ -1,11 +1,13 @@
 import React from 'react'
 import axios from 'axios';
 import moment from 'moment';
-import { UniqueDeviceIDOriginal, UniqueDeviceID } from "@ionic-native/unique-device-id"
+// npm install cordova-plugin-uniquedeviceid
+// npm install @ionic-native/unique-device-id
+// ionic cap sync
+// Maybe use the other package from capacitor.Device (getUid)
+// import { UniqueDeviceIDOriginal, UniqueDeviceID } from "@ionic-native/unique-device-id"
+import { Device } from "@capacitor/core";
 import { toast } from 'react-toastify'
-
-// TODO : Ionic Toasts
-
 import _ from 'lodash';
 import {
 	AUTH_FINGERPRINT_REQUEST,
@@ -26,8 +28,14 @@ import {
 	AUTH_LOGOUT_REQUEST,
 	AUTH_LOGOUT_SUCCESS,
 } from './types/authTypes'
+const { getUid } = Device;
 
 const DATE_FORMAT = "ddd, MMM Do YYYY, hA";
+
+// npm install cordova-plugin-uniquedeviceid
+// npm install @ionic-native/unique-device-id
+// ionic cap sync
+
 
 // let visitorId;
 // let requestInterceptor;
@@ -49,39 +57,52 @@ const DATE_FORMAT = "ddd, MMM Do YYYY, hA";
 // 	})
 // });
 
-const authFingerprintSuccess = (fingerprint) => ({ type: AUTH_FINGERPRINT_SUCCESS, fingerprint });
+const authFingerprintSuccess = () => ({ type: AUTH_FINGERPRINT_SUCCESS });
 const authFingerprintFailure = (error, errorMsg) => ({ type: AUTH_FINGERPRINT_FAILURE, error_data: error, error: errorMsg });
 export const authFingerprint = () => {
 	return (dispatch) => {
+
+		// TODO : Maybe use both methods for fallback possibility??
+
+		const visitorId = getUid();
+		axios.post('/auth/fingerprint', { visitorId })
+			.then(response => {
+
+				// Add fingerprint to header
+				axios.defaults.headers.common['x-finger-print'] = visitorId;
+
+				dispatch(authFingerprintSuccess(visitorId))
+			})
+			.catch(error => {
+				dispatch(authFingerprintFailure(error, "failed to store fingerprint on server"))
+				// toast.error(<><strong>Oops!</strong> {error}</>, { autoClose: 10000, })
+			})
+
+		// Using the native UniqueDeviceId (synced with capacitor)
 		// TODO: get device id
-		UniqueDeviceID.get()
-			.then((uuid) => {
-				console.log("Resolve Device UUID", uuid)
-				console.log("Got UUID " + uuid);
-				// Register visitor with API
-				axios.post('/auth/fingerprint', { visitorId: uuid })
-					.then(response => {
+		// UniqueDeviceID.get()
+		// 	.then((uuid) => {
+		// 		// Register visitor with API
+		// 		axios.post('/auth/fingerprint', { visitorId: uuid })
+		// 			.then(response => {
 
-						console.log("Success storing Device ID");
+		// 				// Add fingerprint to header
+		// 				axios.defaults.headers.common['x-finger-print'] = uuid;
 
-						// Add fingerprint to header
-						axios.defaults.headers.common['x-finger-print'] = uuid;
+		// 				dispatch(authFingerprintSuccess(uuid))
+		// 			})
+		// 			.catch(error => {
+		// 				dispatch(authFingerprintFailure(error, "failed to store fingerprint on server"))
+		// 				// toast.error(<><strong>Oops!</strong> {error}</>, { autoClose: 10000, })
+		// 			})
 
-						dispatch(authFingerprintSuccess(uuid))
-					})
-					.catch(error => {
-						console.log("Error storing Device ID");
-						console.log(error);
-						dispatch(authFingerprintFailure(error, "failed to store fingerprint on server"))
-					})
-
-			})
-			.catch((error) => {
-				console.log("Unable to resolve Device UUID", error)
-				dispatch(authFingerprintFailure(error, "Unable to resolve Device UUID"))
-				dispatch(authFingerprintFailure(error, error))
-
-			})
+		// 	})
+		// 	.catch((error) => {
+		// 		// console.log("Unable to resolve Device UUID", error)
+		// 		// toast.error(<><strong>Oops!</strong> {error}<br />Attempting 2nd plugin</>, { autoClose: 10000, })
+		// 		dispatch(authFingerprintFailure(error, "Unable to resolve Device UUID"))
+		// 		// toast(getUid(), { autoClose: 10000, });
+		// 	})
 	}
 }
 
@@ -172,12 +193,14 @@ export const authLogin = auth => {
 	}
 }
 
-
+// To remove auth token and refresh token
+const disposeAuth = () => { delete axios.defaults.headers.common["AUTHORIZATION"]; localStorage.removeItem('refresh'); }
 const authRefreshRequest = () => ({ type: AUTH_REFRESH_REQUEST });
 const authRefreshSuccess = auth => ({ type: AUTH_REFRESH_SUCCESS, auth });
 const authRefreshFailure = error => ({ type: AUTH_REFRESH_FAILURE, error });
 export const authRefresh = refresh_token => {
 	return (dispatch) => {
+
 		dispatch(authRefreshRequest());
 
 		// Dispose old Auth Interceptor
@@ -211,13 +234,14 @@ export const authRefresh = refresh_token => {
 					.catch(error => {
 						const errorData = error.response ? error.response.data : {};
 						const errorMsg = error.response && error.response.data ? (error.response.data.message ? error.response.data.message : (typeof error.response.data.error === 'string' ? error.response.data.error : error.message)) : error.message;
+						disposeAuth();
 						dispatch(authRefreshFailure(error))
 					});
 			})
 			.catch(error => {
 				const errorData = error.response ? error.response.data : {};
 				const errorMsg = error.response && error.response.data ? (error.response.data.message ? error.response.data.message : (typeof error.response.data.error === 'string' ? error.response.data.error : error.message)) : error.message;
-				localStorage.removeItem('refresh');
+				disposeAuth();
 				dispatch(authRefreshFailure(error))
 			})
 	}
@@ -228,14 +252,14 @@ export const authLogout = auth => {
 	return (dispatch) => {
 		dispatch(authLogoutRequest())
 
-		delete axios.defaults.headers.common["Authorization"];
+		delete axios.defaults.headers.common["AUTHORIZATION"];
 		const refresh_token = localStorage.getItem('refresh');
 
 		if (refresh_token) {
 			axios.post('/auth/logout/', { refresh_token })
 				.then(response => { })
 				.catch(error => { })
-				.then(response => {
+				.finally(() => {
 					localStorage.removeItem('refresh');
 					dispatch(authLogoutSuccess());
 				});
@@ -280,8 +304,7 @@ const createAuthInterceptor = refresh_token => {
 							.catch(error => {
 
 								// Dispose bad access token and refresh token
-								delete axios.defaults.headers.common["Authorization"];
-								localStorage.removeItem('refresh');
+								disposeAuth();
 
 								// TODO : eject the interceptor in this case!
 								// Dispose old Auth Interceptor
@@ -299,8 +322,7 @@ const createAuthInterceptor = refresh_token => {
 								// TODO : dispatch authLogout()
 
 								// Dispose bad access token and refresh token
-								delete axios.defaults.headers.common["Authorization"];
-								localStorage.removeItem('refresh');
+								disposeAuth();
 
 								// TODO : eject the interceptor in this case!
 								// Dispose old Auth Interceptor
