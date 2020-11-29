@@ -78,6 +78,9 @@ ion-app.cameraView .nav-decor {
   background: transparent none !important;
   --background: transparent none !important;
 }
+ion-popover.my-custom-class {
+	--backdrop-opacity: .1;
+}
 
 .toast-secondary {
   font-size: 12px;
@@ -216,6 +219,11 @@ ion-datetime.form-item__input::part(placeholder) {
   height: 60px;
   /* margin-top: 1rem; */
   margin-bottom: 4px;
+}
+.form-item__submit.form-item__submit--center-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .form-item__input {

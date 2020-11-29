@@ -12,7 +12,7 @@ import { RootStateOrAny, useDispatch, useSelector } from "react-redux";
 import { flushPoll, getPoll, votePoll } from "../../store/actions/pollActions";
 import socket from "../../store/socket";
 import { useParams } from "react-router";
-
+import { ImpulseSpinner } from "react-spinners-kit";
 
 const Poll: React.FC = () => {
   const { id } = useParams<any>();
@@ -21,9 +21,13 @@ const Poll: React.FC = () => {
   const [passcode, setPasscode] = useState<string>("");
 
   const dispatch = useDispatch();
-  const { poll, error, selected, loading: poll_loading } = useSelector(
-    (state: RootStateOrAny) => state.poll
-  );
+  const {
+    poll,
+    error,
+    selected,
+    loading: poll_loading,
+    voting: isVoting,
+  } = useSelector((state: RootStateOrAny) => state.poll);
   const { global_loading: auth_loading, fingerprint } = useSelector(
     (state: RootStateOrAny) => state.auth
   );
@@ -95,7 +99,7 @@ const Poll: React.FC = () => {
             onClick={handlePasscode}
             className="btn btn--tertiary form-item__submit"
             type="button"
-            value="Vote"
+            value="Save"
           />
         </div>
       </form>
@@ -229,13 +233,16 @@ const Poll: React.FC = () => {
               ) : null}
               <div className="form-item">
                 <button
-                  className="btn btn--tertiary form-item__submit"
+                  className="btn btn--tertiary form-item__submit form-item__submit--center-content"
                   onClick={handleVote}
                   disabled={
-                    selected == null || poll.voted != null || poll.expired
+                    selected == null ||
+                    poll.voted != null ||
+                    poll.expired ||
+                    isVoting
                   }
                 >
-                  Vote
+                  {isVoting ? <ImpulseSpinner backColor={"#55c57a"} /> : "Vote"}
                 </button>
               </div>
             </div>
