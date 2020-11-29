@@ -96,7 +96,6 @@ const EditPollPopover = ({
   };
 
   const handleExpiryDateChange = (e) => {
-    console.log("Selected Date: ", e.detail.value);
     const _d = moment(e.detail.value);
 
     // Change Date that is displayed (in shadow dom)
@@ -108,11 +107,25 @@ const EditPollPopover = ({
       );
     }
 
-    console.log(shadow_PHolder);
     if (!_d.isValid() || !_d.isAfter(moment())) {
-      setExpireDate(DEFAULT_EXPIRE_DATE);
+      // NO Def Exp: No Def Exp (keep)
+      // Def Exp In future - Remove Def Exp
+      // Def Exp in The past - _d.valid and before Exp - remove
+      // Def Exp in The past - !_d.valid or after Exp - keep default
 
-      if (shadow_PHolder) shadow_PHolder.innerHTML = NO_EXPIRY_PLACEHOLDER;
+      if (
+        DEFAULT_EXPIRE_DATE &&
+        (moment(DEFAULT_EXPIRE_DATE).isAfter(moment()) ||
+          (_d.isValid() && _d.isBefore(moment(DEFAULT_EXPIRE_DATE))))
+      ) {
+        setExpireDate("");
+        if (shadow_PHolder) shadow_PHolder.innerHTML = NO_EXPIRY_PLACEHOLDER;
+      } else {
+        setExpireDate(DEFAULT_EXPIRE_DATE);
+        shadow_PHolder.innerHTML = DEFAULT_EXPIRE_DATE
+          ? moment(DEFAULT_EXPIRE_DATE).format(EXPIRY_FORMAT)
+          : NO_EXPIRY_PLACEHOLDER;
+      }
     } else {
       setExpireDate(e.detail.value);
 
