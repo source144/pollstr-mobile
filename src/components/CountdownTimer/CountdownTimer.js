@@ -27,7 +27,7 @@ const renderTime = ({ remainingTime }) => {
 
 	return (
 		<div className="timer">
-			<div className="text">Remaining</div>
+			{/* <div className="text">Remaining</div> */}
 			<div className="time">{time}</div>
 			<div className="text">{dimension}</div>
 		</div>

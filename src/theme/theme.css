@@ -485,23 +485,50 @@ a.btn.noresult--cta {
   padding: 22px;
 }
 
-.my-polls__search-btn {
+.my-polls__search-input {
+  display: flex;
+}
+
+.my-polls__search-action {
   background: transparent;
   border: none;
   outline: none;
 
   transition: all 0.1s;
   cursor: pointer;
-  color: var(--color-primary-light);
+
+  display: flex;
+  align-items: center;
+  margin-left: -23px;
 }
 
-.my-polls__search-btn:active {
+.my-polls__search-action .my-polls__search-action--clear {
+  padding: 6px;
+  color: var(--color-grey-light-4);
+  background: none;
+  outline: none;
+}
+.my-polls__search-action .my-polls__search-action--clear:disabled {
+  color: transparent;
+}
+
+.my-polls__search-action .my-polls__search-action--search {
+  padding: 6px;
+  transition: all 0.2s;
+  color: var(--color-primary-light);
+  background: none;
+  outline: none;
+}
+
+.my-polls__search-action .my-polls__search-action--search:active {
   transform: translateY(1px);
 }
 
-.my-polls__search-btn:disabled {
+.my-polls__search-action .my-polls__search-action--search:disabled {
   cursor: default;
   color: var(--color-grey-light-4);
+  background: none;
+  outline: none;
 }
 
 .btn.btn--primary-1 {

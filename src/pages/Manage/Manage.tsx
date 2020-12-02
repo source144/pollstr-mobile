@@ -4,7 +4,7 @@ import ManagePoll from "../../components/ManagePoll/ManagePoll";
 import _ from "lodash";
 import { flushPolls, getPolls } from "../../store/actions/managePollsActions";
 import { Link } from "react-router-dom";
-import { faSearch } from "@fortawesome/free-solid-svg-icons";
+import { faSearch, faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 // const polls = [
@@ -200,6 +200,7 @@ const Manage: React.FC = () => {
   );
   const [disableSearch, setDisableSearch] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentQuery, setCurrentQuery] = useState("");
   const searchForm = useRef(null);
   const hasAuth = !_.isEmpty(auth);
 
@@ -219,13 +220,25 @@ const Manage: React.FC = () => {
       noResults = (
         <>
           <div className="noresult--primary">You have no Polls</div>
-          <Link to="/polls/create" className="btn btn--primary-1 noresult--cta">
+          <Link to="/poll/create" className="btn btn--primary-1 noresult--cta">
             Create New Poll
           </Link>
         </>
       );
   }
 
+  const clearSearch = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    e.preventDefault();
+
+    if (!currentQuery) return;
+
+    const input: any = searchForm!.current!["query"];
+    input.value = "";
+
+    setCurrentQuery("");
+    setDisableSearch("" === searchQuery);
+    input.focus();
+  };
   const submitSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -244,6 +257,7 @@ const Manage: React.FC = () => {
   const onSearchChange = (e: any) => {
     e.preventDefault();
 
+    setCurrentQuery(e.target.value);
     setDisableSearch(e.target.value === searchQuery);
   };
 
@@ -273,13 +287,24 @@ const Manage: React.FC = () => {
                 type="text"
                 placeholder="Filter Polls"
               />
-              <button
-                type="submit"
-                className="form-item__input-icon my-polls__search-btn"
-                disabled={disableSearch}
-              >
-                <FontAwesomeIcon icon={faSearch} />
-              </button>
+              <div className="form-item__input-icon my-polls__search-action">
+                <button
+                  className="my-polls__search-action--clear"
+                  disabled={!currentQuery}
+                  type="button"
+                  onClick={clearSearch}
+                  tabIndex={-1}
+                >
+                  <FontAwesomeIcon icon={faTimesCircle} />
+                </button>
+                <button
+                  disabled={disableSearch}
+                  type="submit"
+                  className="my-polls__search-action--search"
+                >
+                  <FontAwesomeIcon icon={faSearch} />
+                </button>
+              </div>
             </div>
           </form>
         </div>
