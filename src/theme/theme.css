@@ -79,7 +79,7 @@ ion-app.cameraView .nav-decor {
   --background: transparent none !important;
 }
 ion-popover.my-custom-class {
-	--backdrop-opacity: .1;
+  --backdrop-opacity: 0.1;
 }
 
 .toast-secondary {
@@ -460,4 +460,44 @@ ion-item.option-item::part(native) {
 }
 .option-reorder {
   margin-left: -32px;
+}
+
+.noresult {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.noresult--primary {
+  font-size: 42px;
+  font-weight: 500;
+}
+.noresult--secondary {
+  font-size: 22px;
+}
+
+.noresult--cta,
+.btn.noresult--cta {
+  margin-top: 10px;
+  font-size: 32px;
+  padding: 2.2rem;
+}
+
+.my-polls__search-btn {
+  background: transparent;
+  border: none;
+  outline: none;
+
+  transition: all 0.1s;
+  cursor: pointer;
+  color: var(--color-primary-light);
+}
+
+.my-polls__search-btn:active {
+  transform: translateY(1px);
+}
+
+.my-polls__search-btn:disabled {
+  cursor: default;
+  color: var(--color-grey-light-4);
 }
