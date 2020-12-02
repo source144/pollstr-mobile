@@ -291,6 +291,7 @@ const Manage: React.FC = () => {
                 height: "100%",
                 alignItems: "center",
                 justifyContent: "center",
+                paddingTop: "15px",
               }}
             >
               <div
