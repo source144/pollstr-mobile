@@ -305,7 +305,7 @@ const Manage: React.FC = () => {
                       <ManagePoll poll={poll} key={poll.id} />
                     ))
                   ) : (
-                    <h1>Oops. Couldn't find any polls!</h1>
+                    <div className="noresult">{noResults}</div>
                   )
                 ) : (
                   <h1>{polls_error}</h1>
