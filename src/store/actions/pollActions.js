@@ -3,6 +3,7 @@ import axios from 'axios';
 import socket from '../socket';
 import _ from 'lodash'
 import { toast } from 'react-toastify';
+
 // TODO : Ionic Toasts
 import {
 	CREATE_POLL_REQUEST,
@@ -28,11 +29,57 @@ import {
 	DISABLE_VOTING,
 	FLUSH_POLL
 } from './types/pollTypes'
+import { Plugins } from "@capacitor/core";
+const { App, BackgroundTask } = Plugins;
+
+
+// Update/Listen to poll once after resuming app
+let __pollId, __dispatch;
+App.addListener("appStateChange", (state) => {
+	if (__pollId && __dispatch) {
+		if (!state.isActive) {
+			if (socket.connected) console.log("[pollActions] App Minimized (connected)");
+			else console.log("[pollActions] App Minimized (disconnected)");
+		} else {
+			if (!socket.connected) {
+				console.log("[pollActions] App Resumed (disconnected)");
+				socket.open();
+				socket.once("connect", () => getUpdatedPoll(__pollId, __dispatch));
+			} else { console.log("[pollActions] App Resumed (connected)"); getUpdatedPoll(__pollId, __dispatch); }
+		}
+	}
+});
+
+const getUpdatedPoll = (pollId, dispatch) => {
+	axios.get(`poll/${pollId}`).then(response => {
+		// Update the poll from the received data
+		dispatch(updatePoll(_.pick(response.data, "total_votes", "options")));
+
+		// Listen to this poll's updates
+		socket.emit('join', `${pollId}`);
+		socket.on(`update_${pollId}`, updatedPoll => {
+			// Fallback if SocketIO payload doesn't arrive!
+			if (!updatedPoll) {
+				console.log("Fetching Updated Poll Using Axios.js")
+				axios.get(`poll/${pollId}`).then(response => {
+					console.log("Fetching Updated Poll via Axios.js success")
+					dispatch(updatePoll(_.pick(response.data, "total_votes", "options")));
+				}).catch(error => { });
+			} else dispatch(updatePoll(updatedPoll));
+		});
+	}).catch(() => { });
+}
+
 
 const updatePoll = updatedPoll => ({ type: UPDATE_POLL, poll: updatedPoll });
 export const selectOption = selected => ({ type: SELECT_OPTION, selected })
 export const disableVoting = () => ({ type: DISABLE_VOTING })
-export const flushPoll = () => ({ type: FLUSH_POLL })
+export const flushPoll = () => {
+	__pollId = __dispatch = undefined;
+
+	return { type: FLUSH_POLL };
+}
+
 
 const getPollRequest = () => ({ type: GET_POLL_REQUEST })
 const getPollSuccess = poll => ({ type: GET_POLL_SUCCESS, poll })
@@ -42,6 +89,9 @@ export const getPoll = pollId => {
 		dispatch(getPollRequest());
 		axios.get(`poll/${pollId}`)
 			.then(response => {
+				__pollId = pollId;
+				__dispatch = dispatch;
+
 				const poll = response.data;
 				dispatch(getPollSuccess(poll));
 
