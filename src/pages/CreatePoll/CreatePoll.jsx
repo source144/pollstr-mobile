@@ -89,6 +89,12 @@ const validate = (payload) => {
   return errors;
 };
 
+const DEFAULT_OPTIONS = () => [
+  { id: uuid(), value: "" },
+  { id: uuid(), value: "" },
+  { id: uuid(), value: "" },
+];
+
 const CreatePoll = () => {
   const {
     auth,
@@ -287,6 +293,11 @@ const CreatePoll = () => {
     toast("Poll Link Copied!");
   };
 
+  const createAnother = () => {
+    setOptions(DEFAULT_OPTIONS());
+    setCreatedId("");
+  };
+
   // (iOS 14.1 bug - no solution..)
   // If native share API fails
   // Simply copy the link
@@ -414,7 +425,7 @@ const CreatePoll = () => {
                     className="btn btn--tertiary form-item__submit"
                     type="submit"
                     value="Create Another!"
-                    onClick={() => setCreatedId("")}
+                    onClick={createAnother}
                   />
                 </div>
               </div>
