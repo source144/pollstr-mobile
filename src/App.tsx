@@ -52,6 +52,7 @@ import AppContext from "./AppContext";
 
 // ~~ React-Toastify Styling
 import "react-toastify/dist/ReactToastify.css";
+import Landing from "./pages/Landing/Landing";
 
 setupConfig({ mode: "ios" });
 
@@ -93,7 +94,10 @@ const App: React.FC = () => (
                     <Route path="/poll/:id">
                       <Poll />
                     </Route>
-                    <Redirect to="/polls/" />
+                    <Route path="/">
+                      <Landing />
+                    </Route>
+                    <Redirect to="/" />
                   </Switch>
                 </PageToolbar>
               </IonRouterOutlet>
