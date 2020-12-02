@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useHistory } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faChevronDown,
@@ -56,6 +57,7 @@ const ManagePoll = ({ poll }) => {
   const [minimized, setMinimized] = useState(false);
   const [passcode, setPasscode] = useState(undefined);
   const [popoverContent, setPopoverContent] = useState("");
+  const history = useHistory();
   const pollWrapper = useRef();
 
   const dispatch = useDispatch();
@@ -277,6 +279,7 @@ const ManagePoll = ({ poll }) => {
                   textToHighlight={poll.title}
                   autoEscape={true}
                   searchWords={["/#w+/g"]}
+                  onClick={() => history.push(`/poll/${poll.id}`)}
                   // searchWords={['/^#(?!_)\w+/']}
                   // searchWords={['/\B(#(?!_)\w+\b)(?!#)/']}
                   // searchWords={/\B(#(?!_)\w+\b)(?!#)/g}
@@ -344,7 +347,7 @@ const ManagePoll = ({ poll }) => {
           <AnimateHeight
             duration={500}
             height={minimized ? 0 : "auto"}
-            className="poll-body"
+			className="poll-body"
           >
             {/* TODO : Poll options without selection, etc. */}
             {poll.options.map((option) => (

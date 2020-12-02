@@ -1,8 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { RootStateOrAny, useDispatch, useSelector } from "react-redux";
 import ManagePoll from "../../components/ManagePoll/ManagePoll";
 import _ from "lodash";
 import { flushPolls, getPolls } from "../../store/actions/managePollsActions";
+import { Link } from "react-router-dom";
+import { faSearch } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 // const polls = [
 //   {
@@ -195,10 +198,54 @@ const Manage: React.FC = () => {
   const { auth, global_loading: auth_loading, fingerprint } = useSelector(
     (state: RootStateOrAny) => state.auth
   );
+  const [disableSearch, setDisableSearch] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchForm = useRef(null);
   const hasAuth = !_.isEmpty(auth);
 
   // Prevent API calls until authenticated/identified
-    const _prevent_fetch_ = auth_loading || (!fingerprint && !hasAuth);
+  const _prevent_fetch_ = auth_loading || (!fingerprint && !hasAuth);
+
+  let noResults;
+  if (!_prevent_fetch_ && !polls_loading) {
+    if (searchQuery)
+      noResults = (
+        <>
+          <div className="noresult--primary">No Polls Found</div>
+          <div className="noresult--secondary">Try a different filter</div>
+        </>
+      );
+    else
+      noResults = (
+        <>
+          <div className="noresult--primary">You have no Polls</div>
+          <Link to="/polls/create" className="btn btn--primary-1 noresult--cta">
+            Create New Poll
+          </Link>
+        </>
+      );
+  }
+
+  const submitSearch = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const form: any = searchForm.current;
+    const query = form["query"].value;
+
+    // alert(query);
+
+    if (_prevent_fetch_ || disableSearch) return;
+
+    setDisableSearch(true);
+    setSearchQuery(query);
+    dispatch(getPolls(query));
+  };
+
+  const onSearchChange = (e: any) => {
+    e.preventDefault();
+
+    setDisableSearch(e.target.value === searchQuery);
+  };
 
   useEffect(() => {
     if (!_prevent_fetch_ || true) {
@@ -212,29 +259,32 @@ const Manage: React.FC = () => {
   return (
     <>
       <div className="content-fullscreen">
+        <div className="content-horizontal-center pt-4">
+          <form
+            className="form-form-wrapper polls-header"
+            onSubmit={submitSearch}
+            ref={searchForm}
+          >
+            <div className="my-polls__search-input">
+              <input
+                onChange={onSearchChange}
+                name="query"
+                className="form-item__input form-item__input--small"
+                type="text"
+                placeholder="Filter Polls"
+              />
+              <button
+                type="submit"
+                className="form-item__input-icon my-polls__search-btn"
+                disabled={disableSearch}
+              >
+                <FontAwesomeIcon icon={faSearch} />
+              </button>
+            </div>
+          </form>
+        </div>
         {!_prevent_fetch_ && !polls_loading && Array.isArray(polls) ? (
           <>
-            <div className="content-horizontal-center pt-4">
-              <header className="form-form-wrapper polls-header">
-                <h1>Your Polls</h1>
-                <div className="my-polls__search">
-                  <div className="my-polls__search-input">
-                    <input
-                      className="form-item__input form-item__input--small"
-                      type="text"
-                      placeholder="Filter Polls"
-                    />
-                    <span className="form-item__input-icon">
-                      <i className="fas fa-search"></i>
-                    </span>
-                  </div>
-                  <div className="my-polls__search-filters">
-                    <label htmlFor="guests">Guests</label>
-                    <input name="guests" type="checkbox" />
-                  </div>
-                </div>
-              </header>
-            </div>
             <div
               style={{
                 display: "flex",
